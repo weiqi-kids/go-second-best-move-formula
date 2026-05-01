@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>圍棋的「第二好的一手」——為什麼不存在捷徑？</title>
+  <style>
+    /* ===== CSS Custom Properties (OKLCH primary, hex fallback) ===== */
+    :root {
+      /* Background */
+      --bg-base: oklch(0.97 0.005 250);
+      --bg-surface: oklch(0.94 0.005 250);
+      --bg-overlay: oklch(0.90 0.008 250);
+      --bg-hover: oklch(0.92 0.005 250);
+
+      /* Text */
+      --text-primary: oklch(0.20 0.01 250);
+      --text-secondary: oklch(0.45 0.01 250);
+      --text-muted: oklch(0.47 0.01 250);
+
+      /* Semantic colors */
+      --color-info: oklch(0.52 0.13 240);
+      --color-critical: oklch(0.55 0.22 25);
+      --color-pass: oklch(0.48 0.16 150);
+      --color-medium: oklch(0.46 0.14 80);
+      --color-high: oklch(0.48 0.16 55);
+      --color-indigo: oklch(0.48 0.15 280);
+      --color-link: oklch(0.48 0.15 250);
+
+      /* Other */
+      --border-subtle: oklch(0.85 0.005 250);
+      --stone-black: oklch(0.25 0.01 250);
+      --stone-white: oklch(0.95 0.005 250);
+
+      /* Typography tokens */
+      --text-3xl: 56px;
+      --text-2xl: 48px;
+      --text-xl: 32px;
+      --text-lg: 28px;
+      --text-base: 24px;
+      --text-sm: 20px;
+      --text-xs: 18px;
+    }
+
+    @supports not (color: oklch(0 0 0)) {
+      :root {
+        --bg-base: #f5f6f8;
+        --bg-surface: #ecedf0;
+        --bg-overlay: #dfe0e5;
+        --bg-hover: #e5e6ea;
+        --text-primary: #1e2030;
+        --text-secondary: #5e6070;
+        --text-muted: #626476;
+        --color-info: #2a6bb8;
+        --color-critical: #c93135;
+        --color-pass: #1e8050;
+        --color-medium: #7a6218;
+        --color-high: #9e5820;
+        --color-indigo: #4830b8;
+        --color-link: #1e5ab8;
+        --border-subtle: #d5d6da;
+        --stone-black: #2a2c3a;
+        --stone-white: #f0f1f3;
+      }
+    }
+
+    /* ===== Reset ===== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ===== Base ===== */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   "Helvetica Neue", Arial, sans-serif;
+      font-size: var(--text-base);
+      line-height: 1.6;
+      color: var(--text-primary);
+      background: var(--bg-base);
+    }
+
+    /* ===== Skip link ===== */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--color-link);
+      color: white;
+      border-radius: 0.25rem;
+      z-index: 9999;
+      font-size: var(--text-xs);
+      text-decoration: none;
+    }
+    .skip-link:focus {
+      top: 1rem;
+    }
+
+    /* ===== Page wrapper ===== */
+    .page-wrapper {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    /* ===== Hero ===== */
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem;
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .hero h1 {
+      font-size: var(--text-3xl);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      max-width: 40rem;
+    }
+    .hero .subtitle {
+      font-size: var(--text-lg);
+      color: var(--text-secondary);
+      max-width: 36rem;
+    }
+    .hero-board {
+      margin-top: 2rem;
+    }
+
+    /* ===== Chapter ===== */
+    .chapter {
+      margin-bottom: 4rem;
+      position: relative;
+    }
+    .chapter-title {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      margin-bottom: 2rem;
+      padding-top: 2rem;
+    }
+
+    /* ===== Scrollytelling layout ===== */
+    .scrolly {
+      position: relative;
+      display: flex;
+      gap: 2rem;
+    }
+    .scrolly-text {
+      flex: 0 0 40%;
+    }
+    .scrolly-chart {
+      flex: 0 0 calc(60% - 2rem);
+      position: -webkit-sticky;
+      position: sticky;
+      top: 2rem;
+      height: fit-content;
+      align-self: flex-start;
+    }
+
+    /* ===== Step ===== */
+    .step {
+      margin-bottom: 60vh;
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
+    }
+    .step.is-active {
+      opacity: 1;
+    }
+    .step:last-child {
+      margin-bottom: 20vh;
+    }
+    .step-content {
+      font-size: var(--text-base);
+    }
+
+    /* ===== Chart container ===== */
+    .chart-container {
+      background: var(--bg-surface);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      min-height: 300px;
+      position: relative;
+    }
+    .chart-container .chart-skeleton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+    }
+    .chart-container svg {
+      width: 100%;
+      height: auto;
+    }
+
+    /* ===== Accordion ===== */
+    .accordion {
+      margin-top: 1rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .accordion-btn {
+      background: var(--bg-surface);
+      border: none;
+      width: 100%;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      text-align: left;
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .accordion-btn:hover {
+      background: var(--bg-hover);
+    }
+    .accordion-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: var(--bg-surface);
+      padding: 0 1rem;
+    }
+    .accordion.is-open .accordion-panel {
+      max-height: 2000px;
+      padding: 0.5rem 1rem 1rem;
+    }
+    .accordion-panel .math-content {
+      font-size: var(--text-sm);
+      overflow-x: auto;
+    }
+
+    /* ===== Tooltip ===== */
+    .tooltip {
+      position: fixed;
+      pointer-events: none;
+      background: var(--text-primary);
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
+      font-size: var(--text-sm);
+      max-width: min(300px, 80vw);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .tooltip.is-visible {
+      opacity: 1;
+    }
+
+    /* ===== Buttons ===== */
+    .btn {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: var(--color-link);
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: var(--text-xs);
+    }
+    .btn:hover {
+      opacity: 0.9;
+    }
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+
+    /* ===== Slider ===== */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border-subtle);
+      outline: none;
+      margin: 1rem 0;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--color-link);
+      border: 2px solid white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover,
+    input[type="range"]::-webkit-slider-thumb:active {
+      transform: scale(1.2);
+      background: var(--color-info);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--color-link);
+      border: 2px solid white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb:hover,
+    input[type="range"]::-moz-range-thumb:active {
+      transform: scale(1.2);
+      background: var(--color-info);
+    }
+
+    /* ===== Focus ===== */
+    :focus-visible {
+      outline: 3px solid var(--color-link);
+      outline-offset: 2px;
+    }
+
+    /* ===== Footer ===== */
+    .site-footer {
+      padding: 3rem 1rem;
+      border-top: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+      text-align: center;
+    }
+
+    /* ===== FAQ ===== */
+    .faq {
+      margin: 2rem 0;
+    }
+
+    /* ===== Print ===== */
+    @media print {
+      .scrolly-chart {
+        position: static !important;
+      }
+      .interactive-controls,
+      .btn-group,
+      .accordion-btn {
+        display: none;
+      }
+      .print-fallback {
+        display: block;
+      }
+      .step {
+        opacity: 1 !important;
+        margin-bottom: 2rem !important;
+      }
+      body {
+        background: white;
+      }
+      .tooltip {
+        display: none;
+      }
+    }
+
+    /* ===== Reduced motion ===== */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0s !important;
+        animation-duration: 0s !important;
+      }
+    }
+
+    /* ===== Tablet (768–1023px) ===== */
+    @media (max-width: 1023px) and (min-width: 768px) {
+      .scrolly-text {
+        flex: 0 0 45%;
+      }
+      .scrolly-chart {
+        flex: 0 0 calc(55% - 2rem);
+      }
+      .step {
+        margin-bottom: 40vh;
+      }
+    }
+
+    /* ===== Mobile (<768px) ===== */
+    @media (max-width: 767px) {
+      :root {
+        --text-3xl: 36px;
+        --text-xl: 24px;
+        --text-lg: 22px;
+        --text-base: 20px;
+      }
+      .scrolly {
+        flex-direction: column;
+      }
+      .scrolly-text {
+        flex: none;
+      }
+      .scrolly-chart {
+        flex: none;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        max-height: min(50vw, 40vh);
+        overflow: hidden;
+      }
+      .step {
+        margin-bottom: 30vh;
+      }
+      .hero {
+        min-height: 60vh;
+        padding: 2rem 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">跳至主要內容</a>
+
+  <div class="page-wrapper">
+    <header class="hero">
+      <h1>圍棋的「第二好的一手」——為什麼不存在捷徑？</h1>
+      <p class="subtitle">一個業餘棋手的直覺問題，如何通往計算理論的深處</p>
+      <div class="hero-board" id="hero-board" role="img" aria-label="裝飾用的九路圍棋棋盤，上面散落著幾顆黑白棋子"></div>
+    </header>
+
+    <main id="main">
+      <!-- Chapters will be added in subsequent tasks -->
+    </main>
+
+    <footer class="site-footer">
+      <p>本文的數學推導由作者與 AI（Claude）協作完成。互動網頁由 AI 輔助設計與開發。</p>
+    </footer>
+  </div>
+
+  <div class="tooltip" id="tooltip" role="tooltip"></div>
+
+  <!-- D3.js v7.9.0 -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"
+          crossorigin="anonymous"
+          onerror="document.getElementById('d3-fallback').style.display='block'"></script>
+  <noscript>
+    <p style="text-align:center;padding:2rem;color:#c93135;">本頁需要 JavaScript 才能顯示互動圖表。</p>
+  </noscript>
+  <div id="d3-fallback" style="display:none;text-align:center;padding:2rem;color:var(--color-critical);font-size:var(--text-sm);">
+    互動圖表載入失敗，請檢查網路連線。
+  </div>
+
+  <!-- MathJax config (must come before MathJax script) -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      },
+      startup: {
+        typeset: false
+      }
+    };
+  </script>
+  <!-- MathJax 3.2.2 -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"
+          crossorigin="anonymous"
+          async></script>
+
+  <!-- ===== Global JavaScript (IIFE) ===== -->
+  <script>
+  (function() {
+    'use strict';
+
+    // ---- Color helper ----
+    var root = document.documentElement;
+
+    window.getColor = function(varName) {
+      return getComputedStyle(root).getPropertyValue(varName).trim();
+    };
+
+    // ---- Tooltip ----
+    var tooltipEl = document.getElementById('tooltip');
+    var tooltipTimer = null;
+
+    window.showTooltip = function(html, x, y) {
+      tooltipEl.innerHTML = html;
+      tooltipEl.classList.add('is-visible');
+
+      // Measure after making visible
+      var rect = tooltipEl.getBoundingClientRect();
+      var vw = window.innerWidth;
+      var vh = window.innerHeight;
+
+      var left = x + 8;
+      var top = y + 8;
+
+      // Edge detection: flip if overflowing
+      if (left + rect.width > vw - 16) {
+        left = x - rect.width - 8;
+      }
+      if (left < 8) {
+        left = 8;
+      }
+      if (top + rect.height > vh - 16) {
+        top = y - rect.height - 8;
+      }
+      if (top < 8) {
+        top = 8;
+      }
+
+      tooltipEl.style.left = left + 'px';
+      tooltipEl.style.top = top + 'px';
+
+      // Mobile: auto-dismiss after 3s
+      if (tooltipTimer) {
+        clearTimeout(tooltipTimer);
+      }
+      if (window.innerWidth < 768) {
+        tooltipTimer = setTimeout(function() {
+          window.hideTooltip();
+        }, 3000);
+      }
+    };
+
+    window.hideTooltip = function() {
+      tooltipEl.classList.remove('is-visible');
+      if (tooltipTimer) {
+        clearTimeout(tooltipTimer);
+        tooltipTimer = null;
+      }
+    };
+
+    // Dismiss tooltip on tap elsewhere (mobile)
+    document.addEventListener('touchstart', function(e) {
+      if (!e.target.closest('[data-tooltip]')) {
+        window.hideTooltip();
+      }
+    }, { passive: true });
+
+    // ---- Accordion click handler ----
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.accordion-btn');
+      if (!btn) return;
+
+      var accordion = btn.closest('.accordion');
+      if (!accordion) return;
+
+      var panel = btn.nextElementSibling;
+      if (!panel) return;
+
+      var isOpen = accordion.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', String(isOpen));
+
+      // Trigger MathJax typeset when opening
+      if (isOpen && window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise([panel]).catch(function(err) {
+          // Silently handle MathJax errors
+        });
+      }
+    });
+
+    // ---- Scrollytelling engine ----
+    var stepObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+
+        var step = entry.target;
+        var chapter = step.closest('.chapter');
+        if (!chapter) return;
+
+        // Deactivate all steps in this chapter
+        var allSteps = chapter.querySelectorAll('.step');
+        allSteps.forEach(function(s) {
+          s.classList.remove('is-active');
+        });
+
+        // Activate current step
+        step.classList.add('is-active');
+
+        // Call chart updater
+        var stepIndex = parseInt(step.dataset.step, 10);
+        var chapterId = chapter.id;
+        if (window.chartUpdaters && window.chartUpdaters[chapterId]) {
+          window.chartUpdaters[chapterId](stepIndex);
+        }
+      });
+    }, {
+      rootMargin: '-40% 0px -40% 0px',
+      threshold: 0
+    });
+
+    // ---- Chart lifecycle manager ----
+    var activeCharts = new Map(); // id -> order counter
+    var chartInitFns = {};
+    var chartDestroyFns = {};
+    var chartCounter = 0;
+
+    window.chartUpdaters = {};
+
+    window.registerChart = function(id, initFn, destroyFn) {
+      chartInitFns[id] = initFn;
+      chartDestroyFns[id] = destroyFn;
+    };
+
+    // Lazy init observer: 200px before entering viewport
+    var chartObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        var id = entry.target.id;
+        if (entry.isIntersecting) {
+          if (!activeCharts.has(id) && chartInitFns[id]) {
+            // Enforce max 3 active SVGs
+            if (activeCharts.size >= 3) {
+              // Find oldest by counter
+              var oldestId = null;
+              var oldestCounter = Infinity;
+              activeCharts.forEach(function(counter, chartId) {
+                if (counter < oldestCounter) {
+                  oldestCounter = counter;
+                  oldestId = chartId;
+                }
+              });
+              if (oldestId && chartDestroyFns[oldestId]) {
+                chartDestroyFns[oldestId]();
+                activeCharts.delete(oldestId);
+              }
+            }
+            chartInitFns[id]();
+            activeCharts.set(id, chartCounter++);
+          }
+        }
+      });
+    }, {
+      rootMargin: '200px 0px 200px 0px'
+    });
+
+    // Teardown observer: 200% (2 screens) away
+    var teardownObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        var id = entry.target.id;
+        if (!entry.isIntersecting && activeCharts.has(id)) {
+          if (chartDestroyFns[id]) {
+            chartDestroyFns[id]();
+          }
+          activeCharts.delete(id);
+        }
+      });
+    }, {
+      rootMargin: '200% 0px 200% 0px'
+    });
+
+    // ---- Resize handler with 300ms debounce ----
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        activeCharts.forEach(function(counter, id) {
+          if (chartDestroyFns[id]) chartDestroyFns[id]();
+          if (chartInitFns[id]) {
+            chartInitFns[id]();
+            activeCharts.set(id, chartCounter++);
+          }
+        });
+      }, 300);
+    });
+
+    // ---- DOMContentLoaded: observe all .step and .chart-container ----
+    window.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.step').forEach(function(s) {
+        stepObserver.observe(s);
+      });
+      document.querySelectorAll('.chart-container').forEach(function(c) {
+        chartObserver.observe(c);
+        teardownObserver.observe(c);
+      });
+    });
+  })();
+  </script>
+
+  <!-- ===== Hero Board (9x9 Go board with decorative stones) ===== -->
+  <script>
+  (function() {
+    'use strict';
+
+    // Guard: if D3 failed to load, skip hero board rendering
+    if (typeof d3 === 'undefined') return;
+
+    var container = d3.select('#hero-board');
+    var size = 280;
+    var padding = 20;
+    var gridSize = 9;
+    var cellSize = (size - padding * 2) / (gridSize - 1);
+
+    var svg = container.append('svg')
+      .attr('viewBox', '0 0 ' + size + ' ' + size)
+      .attr('width', size)
+      .attr('height', size)
+      .attr('role', 'img')
+      .attr('aria-hidden', 'true');
+
+    // Accessible description inside SVG
+    svg.append('desc').text('一個 9x9 的圍棋棋盤，琥珀色底色，上面有 7 顆黑白裝飾用棋子依序淡入。');
+
+    // Board background (amber)
+    svg.append('rect')
+      .attr('width', size)
+      .attr('height', size)
+      .attr('rx', 8)
+      .attr('fill', '#e8c97a');
+
+    // Grid lines
+    var i;
+    for (i = 0; i < gridSize; i++) {
+      var pos = padding + i * cellSize;
+      // Horizontal line
+      svg.append('line')
+        .attr('x1', padding).attr('y1', pos)
+        .attr('x2', size - padding).attr('y2', pos)
+        .attr('stroke', '#a08040')
+        .attr('stroke-width', 0.5);
+      // Vertical line
+      svg.append('line')
+        .attr('x1', pos).attr('y1', padding)
+        .attr('x2', pos).attr('y2', size - padding)
+        .attr('stroke', '#a08040')
+        .attr('stroke-width', 0.5);
+    }
+
+    // Star points (hoshi) for 9x9: (2,2), (2,6), (6,2), (6,6), (4,4)
+    var starPoints = [[2, 2], [2, 6], [6, 2], [6, 6], [4, 4]];
+    starPoints.forEach(function(sp) {
+      svg.append('circle')
+        .attr('cx', padding + sp[0] * cellSize)
+        .attr('cy', padding + sp[1] * cellSize)
+        .attr('r', 2.5)
+        .attr('fill', '#a08040');
+    });
+
+    // Decorative stones (7 stones: 4 black, 3 white)
+    var stones = [
+      { x: 3, y: 3, color: 'black' },
+      { x: 5, y: 5, color: 'black' },
+      { x: 2, y: 4, color: 'black' },
+      { x: 6, y: 3, color: 'black' },
+      { x: 4, y: 4, color: 'white' },
+      { x: 3, y: 5, color: 'white' },
+      { x: 5, y: 2, color: 'white' }
+    ];
+    var stoneRadius = cellSize * 0.42;
+
+    stones.forEach(function(stone, idx) {
+      var cx = padding + stone.x * cellSize;
+      var cy = padding + stone.y * cellSize;
+
+      var g = svg.append('g')
+        .attr('transform', 'translate(' + cx + ',' + cy + ')');
+
+      // Stone shadow
+      g.append('circle')
+        .attr('r', 0)
+        .attr('cx', 1)
+        .attr('cy', 1)
+        .attr('fill', 'rgba(0,0,0,0.15)')
+        .transition()
+        .duration(400)
+        .delay(idx * 100)
+        .attr('r', stoneRadius);
+
+      // Stone body
+      g.append('circle')
+        .attr('r', 0)
+        .attr('fill', stone.color === 'black' ? getColor('--stone-black') : getColor('--stone-white'))
+        .attr('stroke', stone.color === 'black' ? '#111' : '#ccc')
+        .attr('stroke-width', 1)
+        .transition()
+        .duration(400)
+        .delay(idx * 100)
+        .attr('r', stoneRadius);
+    });
+  })();
+  </script>
+</body>
+</html>
