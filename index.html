@@ -3981,9 +3981,12 @@
     var v11Paused = false;
     var v11Tick = 0;
     var v12Started = false;
+    var destroyed = false;
+    var dotTimerId = null;
 
     // ---- V11: 龜兔賽跑動畫 ----
     function drawV11() {
+      destroyed = false;
       var container = d3.select('#' + containerId);
       container.selectAll('*').remove();
       currentView = 'v11';
@@ -4111,21 +4114,21 @@
         .style('flex-wrap', 'wrap');
 
       var playBtn = controls.append('button')
-        .attr('class', 'accordion-btn')
+        .attr('class', 'btn')
         .style('padding', '0.35rem 1rem')
         .style('font-size', Math.max(13, fontSize) + 'px')
         .style('cursor', 'pointer')
         .text('Pause');
 
       var stepBtn = controls.append('button')
-        .attr('class', 'accordion-btn')
+        .attr('class', 'btn')
         .style('padding', '0.35rem 1rem')
         .style('font-size', Math.max(13, fontSize) + 'px')
         .style('cursor', 'pointer')
         .text('Step');
 
       var replayBtn = controls.append('button')
-        .attr('class', 'accordion-btn')
+        .attr('class', 'btn')
         .style('padding', '0.35rem 1rem')
         .style('font-size', Math.max(13, fontSize) + 'px')
         .style('cursor', 'pointer')
@@ -4171,6 +4174,7 @@
 
           // Pulse animation
           function pulse(g) {
+            if (destroyed) return;
             g.select('circle')
               .transition().duration(400)
               .attr('r', nodeR + 10)
@@ -4238,6 +4242,7 @@
 
     // ---- V12: 空間 vs 時間對比圖 ----
     function drawV12() {
+      destroyed = false;
       var container = d3.select('#' + containerId);
       container.selectAll('*').remove();
       currentView = 'v12';
@@ -4469,8 +4474,7 @@
             .attr('width', fillW);
 
           dotStep++;
-          var tid = setTimeout(moveDot, 700);
-          animationTimers.push(tid);
+          dotTimerId = setTimeout(moveDot, 700);
         }
 
         var dotStartTid = setTimeout(function() {
@@ -4486,6 +4490,9 @@
 
     // ---- Clear timers ----
     function clearTimers() {
+      destroyed = true;
+      d3.select('#' + containerId).selectAll('*').interrupt();
+      if (dotTimerId) { clearTimeout(dotTimerId); dotTimerId = null; }
       animationTimers.forEach(function(t) { clearTimeout(t); });
       animationTimers = [];
       v11Paused = false;
