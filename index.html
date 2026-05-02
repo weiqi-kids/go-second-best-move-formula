@@ -2327,7 +2327,7 @@
         .attr('viewBox', '0 0 ' + w + ' ' + h)
         .attr('preserveAspectRatio', 'xMidYMid meet');
 
-      svg.append('desc').text('Minimax 博弈樹：值從葉節點傳播到根節點，Max 層取最大值，Min 層取最小值。');
+      svg.append('desc').text('Minimax 博弈樹：值從葉節點傳播到根節點，Max 層取最大值，Min 層取最小值。點擊節點可展開或收合子節點。');
 
       var tree = cloneTree(treeData);
       computeMinimax(tree);
@@ -2345,22 +2345,77 @@
       var maxColor = getColor('--color-info');
       var minColor = getColor('--color-critical');
 
+      // Set initial expand/collapse state:
+      // Root is expanded (show level-1 children), level-1 nodes are collapsed (hide leaves)
+      nodes.forEach(function(node) {
+        var isLeaf = !node.children || node.children.length === 0;
+        if (isLeaf) {
+          node._expanded = false; // leaves have nothing to expand
+          node._isLeaf = true;
+        } else if (node._depth === 0) {
+          node._expanded = true;  // root starts expanded
+          node._isLeaf = false;
+        } else {
+          node._expanded = false; // other non-leaf nodes start collapsed
+          node._isLeaf = false;
+        }
+      });
+
+      // Determine initial visibility: a node is visible if all its ancestors are expanded
+      function isNodeVisible(node) {
+        // Root is always visible
+        if (node._depth === 0) return true;
+        // Find parent by traversing the tree
+        var parent = node._parent;
+        if (!parent) return true;
+        if (!parent._expanded) return false;
+        return isNodeVisible(parent);
+      }
+
+      // Assign _parent references
+      nodes.forEach(function(node) {
+        if (node.children) {
+          node.children.forEach(function(child) {
+            child._parent = node;
+          });
+        }
+      });
+
+      // Build a map from node to its edge lines and node groups
+      var edgeLines = [];
+      var nodeGroupMap = new Map();
+
       // Draw edges
       edges.forEach(function(e) {
-        svg.append('line')
+        var visible = isNodeVisible(e.child);
+        var line = svg.append('line')
           .attr('x1', e.parent._x)
           .attr('y1', e.parent._y + nodeH / 2)
           .attr('x2', e.child._x)
           .attr('y2', e.child._y - nodeH / 2)
           .attr('stroke', getColor('--border-subtle'))
-          .attr('stroke-width', 2);
+          .attr('stroke-width', 2)
+          .style('display', visible ? null : 'none');
+
+        edgeLines.push({ parent: e.parent, child: e.child, line: line });
       });
 
       // Draw nodes with "?" initially
       var nodeGroups = [];
       nodes.forEach(function(node) {
+        var visible = isNodeVisible(node);
+        var isClickable = !node._isLeaf;
+
         var g = svg.append('g')
-          .attr('transform', 'translate(' + node._x + ',' + node._y + ')');
+          .attr('transform', 'translate(' + node._x + ',' + node._y + ')')
+          .style('display', visible ? null : 'none');
+
+        if (isClickable) {
+          g.style('cursor', 'pointer');
+          g.attr('tabindex', '0')
+            .attr('role', 'button')
+            .attr('aria-label', (node.type === 'max' ? 'Max' : 'Min') + ' node, click to ' + (node._expanded ? 'collapse' : 'expand'));
+        }
 
         g.append('rect')
           .attr('x', -nodeW / 2)
@@ -2389,14 +2444,124 @@
           .attr('font-weight', 600)
           .text(node.type === 'max' ? 'Max' : 'Min');
 
-        nodeGroups.push({ node: node, label: label, g: g });
+        // Expand/collapse indicator for non-leaf nodes
+        var indicator = null;
+        if (isClickable) {
+          indicator = g.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('x', nodeW / 2 + 8)
+            .attr('dominant-baseline', 'central')
+            .attr('fill', node.type === 'max' ? maxColor : minColor)
+            .attr('font-size', fontSize)
+            .attr('font-weight', 700)
+            .text(node._expanded ? '\u2212' : '+');
+        }
+
+        var entry = { node: node, label: label, g: g, indicator: indicator };
+        nodeGroups.push(entry);
+        nodeGroupMap.set(node, entry);
       });
 
-      // Auto-play animation: propagate values from leaves to root
+      // Toggle visibility of a subtree rooted at the children of `node`
+      function updateVisibility() {
+        nodes.forEach(function(node) {
+          var ng = nodeGroupMap.get(node);
+          if (!ng) return;
+          var visible = isNodeVisible(node);
+          ng.g.style('display', visible ? null : 'none');
+        });
+        edgeLines.forEach(function(el) {
+          var visible = isNodeVisible(el.child);
+          el.line.style('display', visible ? null : 'none');
+        });
+      }
+
+      // Click handler for non-leaf nodes
+      function toggleNode(node) {
+        if (node._isLeaf) return;
+        node._expanded = !node._expanded;
+
+        // If collapsing, also collapse all descendants
+        if (!node._expanded) {
+          (function collapseDescendants(n) {
+            if (n.children) {
+              n.children.forEach(function(child) {
+                if (!child._isLeaf) {
+                  child._expanded = false;
+                  var cng = nodeGroupMap.get(child);
+                  if (cng && cng.indicator) {
+                    cng.indicator.text('+');
+                  }
+                }
+                collapseDescendants(child);
+              });
+            }
+          })(node);
+        }
+
+        // Update indicator
+        var ng = nodeGroupMap.get(node);
+        if (ng && ng.indicator) {
+          ng.indicator.text(node._expanded ? '\u2212' : '+');
+        }
+
+        // Update aria-label
+        if (ng) {
+          ng.g.attr('aria-label', (node.type === 'max' ? 'Max' : 'Min') + ' node, click to ' + (node._expanded ? 'collapse' : 'expand'));
+        }
+
+        updateVisibility();
+      }
+
+      // Attach click and keyboard handlers
+      nodeGroups.forEach(function(ng) {
+        if (!ng.node._isLeaf) {
+          ng.g.on('click', function() {
+            toggleNode(ng.node);
+          });
+          ng.g.on('keydown', function(event) {
+            if (event && (event.key === 'Enter' || event.keyCode === 13)) {
+              event.preventDefault();
+              toggleNode(ng.node);
+            }
+          });
+        }
+      });
+
+      // Auto-play animation: first expand all nodes, then propagate values
       var maxDepth = levels.length - 1;
       var delay = 500;
 
-      for (var d = maxDepth; d >= 0; d--) {
+      // Step 1: Expand all collapsed non-leaf nodes before animating values
+      var expandStepTime = 400;
+
+      // Expand level by level (depth 0 is already expanded, expand depth 1, etc.)
+      for (var d = 0; d <= maxDepth; d++) {
+        (function(depth) {
+          var tid = setTimeout(function() {
+            if (currentView !== 'v5') return;
+            levels[depth].forEach(function(node) {
+              if (!node._isLeaf && !node._expanded) {
+                node._expanded = true;
+                var ng = nodeGroupMap.get(node);
+                if (ng && ng.indicator) {
+                  ng.indicator.text('\u2212');
+                }
+                if (ng) {
+                  ng.g.attr('aria-label', (node.type === 'max' ? 'Max' : 'Min') + ' node, click to collapse');
+                }
+              }
+            });
+            updateVisibility();
+          }, depth * expandStepTime);
+          animationTimers.push(tid);
+        })(d);
+      }
+
+      // Step 2: After all nodes are expanded, animate values from leaves to root
+      var expandTotal = (maxDepth + 1) * expandStepTime;
+
+      for (var d2 = maxDepth; d2 >= 0; d2--) {
         (function(depth) {
           var tid = setTimeout(function() {
             if (currentView !== 'v5') return;
@@ -2414,9 +2579,9 @@
                   });
               }
             });
-          }, (maxDepth - depth) * delay);
+          }, expandTotal + (maxDepth - depth) * delay);
           animationTimers.push(tid);
-        })(d);
+        })(d2);
       }
     }
 
