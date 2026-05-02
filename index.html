@@ -426,7 +426,52 @@
     </header>
 
     <main id="main">
-      <!-- Chapters will be added in subsequent tasks -->
+      <!-- ===== Chapter 4: 為什麼 Q 沒有公式 ===== -->
+      <section class="chapter" id="ch4">
+        <h2 class="chapter-title">Chapter 4：為什麼 Q 沒有公式</h2>
+        <div class="scrolly">
+          <div class="scrolly-text">
+            <!-- Step 0: 定理 A 歸謬法 -->
+            <div class="step" data-step="0">
+              <div class="step-content">
+                <h3>定理 A：歸謬法</h3>
+                <p>假設你有一台能秒算任何圍棋局面價值的神機——這台機器不只是圍棋作弊器，它等於能解開宇宙間所有超難問題。但數學已經證明：這種萬能機器不可能存在。所以神機不存在，公式也不存在。</p>
+                <div class="accordion">
+                  <button class="accordion-btn" aria-expanded="false" aria-controls="ch4-math-panel">
+                    <span>查看數學細節</span>
+                    <span aria-hidden="true">&#9662;</span>
+                  </button>
+                  <div class="accordion-panel" id="ch4-math-panel" role="region">
+                    <div class="math-content">
+                      <p>$$Q \in \mathrm{FP} \Rightarrow V \in P \Rightarrow \mathrm{EXPTIME} \subseteq P$$</p>
+                      <p>但已知 $P \subsetneq \mathrm{EXPTIME}$（時間層級定理），所以前提「$Q \in \mathrm{FP}$」不成立——多項式時間公式不存在。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 1: 近似也不行 -->
+            <div class="step" data-step="1">
+              <div class="step-content">
+                <h3>近似也不行</h3>
+                <p>圍棋的分數一定是整數。只要近似誤差小於 0.5，四捨五入就能完美恢復精確答案。所以 0.49 的近似就已經等同精確。</p>
+                <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-top: 0.5rem;">拖動右側的滑桿試試看。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="scrolly-chart">
+            <div class="chart-container"
+                 id="chart-v9"
+                 role="img"
+                 aria-label="歸謬法邏輯鏈動畫與近似無效示意圖"
+                 aria-live="polite">
+              <div class="chart-skeleton">圖表載入中…</div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer">
@@ -780,6 +825,390 @@
         .delay(idx * 100)
         .attr('r', stoneRadius);
     });
+  })();
+  </script>
+
+  <!-- ===== Chapter 4: V9 歸謬法邏輯鏈 + V10 近似無效示意 ===== -->
+  <script>
+  (function() {
+    'use strict';
+
+    // Guard: if D3 failed to load, skip
+    if (typeof d3 === 'undefined') return;
+
+    var containerId = 'chart-v9';
+    var currentView = null; // 'v9' | 'v10'
+    var animationTimers = [];
+
+    // ---- V9: 歸謬法邏輯鏈 ----
+    function drawV9() {
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      currentView = 'v9';
+
+      var el = container.node();
+      var w = el.clientWidth || 500;
+      var h = Math.max(400, w * 0.75);
+
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + w + ' ' + h)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svg.append('desc').text('歸謬法邏輯鏈：五個節點依序出現，最後一個顯示矛盾。');
+
+      var nodes = [
+        { label: '假設 Q 有公式', color: getColor('--color-info') },
+        { label: 'Q ∈ FP', color: getColor('--color-info') },
+        { label: 'V ∈ P', color: getColor('--color-info') },
+        { label: 'EXPTIME ⊆ P', color: getColor('--color-high') },
+        { label: '\uD83D\uDCA5 矛盾！', color: getColor('--color-critical') }
+      ];
+
+      var nodeCount = nodes.length;
+      var nodeW = Math.max(100, w * 0.22);
+      var nodeH = Math.max(36, h * 0.09);
+      var fontSize = Math.max(12, Math.min(16, w * 0.03));
+      var arrowFontSize = Math.max(14, Math.min(20, w * 0.035));
+      var spacing = (h - 60) / (nodeCount - 1);
+      var centerX = w / 2;
+      var startY = 40;
+
+      // Define arrowhead marker
+      svg.append('defs').append('marker')
+        .attr('id', 'arrowhead-v9')
+        .attr('viewBox', '0 0 10 7')
+        .attr('refX', 10)
+        .attr('refY', 3.5)
+        .attr('markerWidth', 8)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .append('polygon')
+        .attr('points', '0 0, 10 3.5, 0 7')
+        .attr('fill', getColor('--text-secondary'));
+
+      // Draw nodes and arrows with staggered animation
+      nodes.forEach(function(node, i) {
+        var cy = startY + i * spacing;
+        var isLast = (i === nodeCount - 1);
+
+        // Arrow from previous node
+        if (i > 0) {
+          var prevY = startY + (i - 1) * spacing + nodeH / 2 + 4;
+          var curY = cy - nodeH / 2 - 4;
+
+          var arrow = svg.append('line')
+            .attr('x1', centerX)
+            .attr('y1', prevY)
+            .attr('x2', centerX)
+            .attr('y2', prevY)
+            .attr('stroke', getColor('--text-secondary'))
+            .attr('stroke-width', 2)
+            .attr('marker-end', 'url(#arrowhead-v9)')
+            .attr('opacity', 0);
+
+          var tid = setTimeout(function() {
+            arrow
+              .transition()
+              .duration(400)
+              .attr('y2', curY)
+              .attr('opacity', 1);
+          }, i * 800 - 400);
+          animationTimers.push(tid);
+        }
+
+        // Node group
+        var g = svg.append('g')
+          .attr('transform', 'translate(' + centerX + ',' + cy + ')')
+          .attr('opacity', 0);
+
+        // Rounded rectangle
+        g.append('rect')
+          .attr('x', -nodeW / 2)
+          .attr('y', -nodeH / 2)
+          .attr('width', nodeW)
+          .attr('height', nodeH)
+          .attr('rx', 6)
+          .attr('fill', isLast ? node.color : getColor('--bg-surface'))
+          .attr('stroke', node.color)
+          .attr('stroke-width', 2);
+
+        // Label
+        g.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'central')
+          .attr('font-size', fontSize + 'px')
+          .attr('font-weight', isLast ? '700' : '500')
+          .attr('fill', isLast ? '#fff' : getColor('--text-primary'))
+          .text(node.label);
+
+        // Animate in
+        var tid2 = setTimeout(function() {
+          g.transition()
+            .duration(500)
+            .attr('opacity', 1);
+        }, i * 800);
+        animationTimers.push(tid2);
+      });
+
+      // Subtitle
+      var subtitleY = startY + (nodeCount - 1) * spacing + nodeH / 2 + 28;
+      var subtitle = svg.append('text')
+        .attr('x', centerX)
+        .attr('y', Math.min(subtitleY, h - 10))
+        .attr('text-anchor', 'middle')
+        .attr('font-size', Math.max(11, fontSize - 2) + 'px')
+        .attr('fill', getColor('--text-secondary'))
+        .attr('opacity', 0)
+        .text('因為 P ⊊ EXPTIME（已證），公式不可能存在');
+
+      var tid3 = setTimeout(function() {
+        subtitle.transition()
+          .duration(600)
+          .attr('opacity', 1);
+      }, nodeCount * 800);
+      animationTimers.push(tid3);
+    }
+
+    // ---- V10: 近似無效示意 ----
+    function drawV10() {
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      currentView = 'v10';
+
+      var el = container.node();
+      var w = el.clientWidth || 500;
+      var h = Math.max(300, w * 0.55);
+
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + w + ' ' + h)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svg.append('desc').text('數線示意：拖動滑桿改變近似誤差 ε，觀察四捨五入結果。');
+
+      // Number line parameters
+      var marginLeft = Math.max(40, w * 0.08);
+      var marginRight = Math.max(40, w * 0.08);
+      var lineY = h * 0.35;
+      var lineLeft = marginLeft;
+      var lineRight = w - marginRight;
+      var lineWidth = lineRight - lineLeft;
+      var fontSize = Math.max(12, Math.min(16, w * 0.028));
+
+      var qMin = -3;
+      var qMax = 5;
+      var qRange = qMax - qMin;
+      var trueQ = 2;
+
+      function qToX(q) {
+        return lineLeft + (q - qMin) / qRange * lineWidth;
+      }
+
+      // Draw number line
+      svg.append('line')
+        .attr('x1', lineLeft)
+        .attr('y1', lineY)
+        .attr('x2', lineRight)
+        .attr('y2', lineY)
+        .attr('stroke', getColor('--text-secondary'))
+        .attr('stroke-width', 2);
+
+      // Integer ticks and labels
+      for (var q = qMin; q <= qMax; q++) {
+        var tx = qToX(q);
+        svg.append('line')
+          .attr('x1', tx).attr('y1', lineY - 8)
+          .attr('x2', tx).attr('y2', lineY + 8)
+          .attr('stroke', getColor('--text-secondary'))
+          .attr('stroke-width', 1.5);
+
+        svg.append('text')
+          .attr('x', tx)
+          .attr('y', lineY + 24)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', fontSize + 'px')
+          .attr('fill', getColor('--text-primary'))
+          .text(q);
+      }
+
+      // True value marker (blue diamond)
+      var trueX = qToX(trueQ);
+      var markerSize = Math.max(8, w * 0.015);
+
+      svg.append('polygon')
+        .attr('points', function() {
+          var s = markerSize;
+          return trueX + ','+  (lineY - s - 14) + ' ' +
+                 (trueX + s) + ',' + (lineY - 14) + ' ' +
+                 trueX + ',' + (lineY - 14 + s) + ' ' +
+                 (trueX - s) + ',' + (lineY - 14);
+        })
+        .attr('fill', getColor('--color-info'));
+
+      svg.append('text')
+        .attr('x', trueX)
+        .attr('y', lineY - markerSize - 20)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', Math.max(11, fontSize - 1) + 'px')
+        .attr('fill', getColor('--color-info'))
+        .attr('font-weight', '600')
+        .text('真值 Q=' + trueQ);
+
+      // Approximate value marker (orange circle, moves with slider)
+      var approxMarker = svg.append('circle')
+        .attr('cx', trueX)
+        .attr('cy', lineY)
+        .attr('r', Math.max(6, w * 0.012))
+        .attr('fill', getColor('--color-high'))
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 2);
+
+      var approxLabel = svg.append('text')
+        .attr('x', trueX)
+        .attr('y', lineY + 44)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', Math.max(11, fontSize - 1) + 'px')
+        .attr('fill', getColor('--color-high'))
+        .attr('font-weight', '600')
+        .text('近似值');
+
+      // Result display
+      var resultText = svg.append('text')
+        .attr('x', w / 2)
+        .attr('y', lineY + 74)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', Math.max(14, fontSize + 2) + 'px')
+        .attr('font-weight', '700');
+
+      // Bottom label
+      var bottomLabel = svg.append('text')
+        .attr('x', w / 2)
+        .attr('y', lineY + 100)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', Math.max(12, fontSize) + 'px');
+
+      // Epsilon display
+      var epsDisplay = svg.append('text')
+        .attr('x', w / 2)
+        .attr('y', lineY - markerSize - 48)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', Math.max(13, fontSize + 1) + 'px')
+        .attr('fill', getColor('--text-secondary'));
+
+      // Error bracket (visual ε range)
+      var bracketGroup = svg.append('g');
+
+      // Slider control
+      var sliderContainer = container.append('div')
+        .style('padding', '0 ' + marginLeft + 'px')
+        .style('margin-top', '0.5rem');
+
+      sliderContainer.append('label')
+        .attr('for', 'v10-epsilon-slider')
+        .style('font-size', Math.max(12, fontSize - 1) + 'px')
+        .style('color', getColor('--text-secondary'))
+        .style('display', 'block')
+        .style('margin-bottom', '0.25rem')
+        .text('誤差 \u03B5：');
+
+      var slider = sliderContainer.append('input')
+        .attr('type', 'range')
+        .attr('id', 'v10-epsilon-slider')
+        .attr('min', '0')
+        .attr('max', '120')
+        .attr('value', '0')
+        .attr('step', '1')
+        .attr('aria-label', '控制近似誤差 epsilon 的大小，範圍 0 到 1.2')
+        .style('width', '100%');
+
+      function updateV10(epsilon) {
+        var approxVal = trueQ + epsilon;
+        var approxX = qToX(approxVal);
+        var rounded = Math.round(approxVal);
+
+        approxMarker
+          .transition().duration(100)
+          .attr('cx', approxX);
+
+        approxLabel
+          .transition().duration(100)
+          .attr('x', approxX)
+          .text('近似 ' + approxVal.toFixed(2));
+
+        epsDisplay.text('\u03B5 = ' + epsilon.toFixed(2));
+
+        // Draw bracket showing error range
+        bracketGroup.selectAll('*').remove();
+        if (epsilon > 0) {
+          bracketGroup.append('line')
+            .attr('x1', trueX)
+            .attr('y1', lineY - 12)
+            .attr('x2', approxX)
+            .attr('y2', lineY - 12)
+            .attr('stroke', getColor('--color-high'))
+            .attr('stroke-width', 1.5)
+            .attr('stroke-dasharray', '4 2');
+        }
+
+        if (epsilon < 0.5) {
+          resultText
+            .attr('fill', getColor('--color-pass'))
+            .text('四捨五入 \u2192 ' + rounded + ' \u2713');
+          bottomLabel
+            .attr('fill', getColor('--color-pass'))
+            .text('\u03B5 < 0.5 \u2192 近似等於精確！');
+        } else {
+          resultText
+            .attr('fill', getColor('--color-critical'))
+            .text('四捨五入 \u2192 ' + rounded + ' \u2717');
+          bottomLabel
+            .attr('fill', getColor('--color-critical'))
+            .text('\u03B5 \u2265 0.5 \u2192 偏到隔壁整數，無法恢復');
+        }
+      }
+
+      slider.on('input', function() {
+        var val = +this.value / 100;
+        updateV10(val);
+      });
+
+      // Initial render
+      updateV10(0);
+    }
+
+    // ---- Clear timers ----
+    function clearTimers() {
+      animationTimers.forEach(function(t) { clearTimeout(t); });
+      animationTimers = [];
+    }
+
+    // ---- Chart lifecycle ----
+    function initChart() {
+      // Default: show V9
+      drawV9();
+    }
+
+    function destroyChart() {
+      clearTimers();
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      container.append('div')
+        .attr('class', 'chart-skeleton')
+        .text('圖表載入中…');
+      currentView = null;
+    }
+
+    registerChart(containerId, initChart, destroyChart);
+
+    // ---- Step updater ----
+    window.chartUpdaters['ch4'] = function(stepIndex) {
+      if (stepIndex === 0 && currentView !== 'v9') {
+        clearTimers();
+        drawV9();
+      } else if (stepIndex === 1 && currentView !== 'v10') {
+        clearTimers();
+        drawV10();
+      }
+    };
   })();
   </script>
 </body>
