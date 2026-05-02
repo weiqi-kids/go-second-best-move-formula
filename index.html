@@ -1210,7 +1210,6 @@
           </div>
         </div>
       </section>
-    </main>
 
     <section class="faq" style="max-width:72rem;margin:2rem auto;padding:0 1rem">
       <h2 style="font-size:var(--text-xl);font-weight:700;margin-bottom:1rem">常見問題</h2>
@@ -1248,6 +1247,7 @@
         </div>
       </div>
     </section>
+    </main>
 
     <footer class="site-footer">
       <div class="page-wrapper">
@@ -5500,13 +5500,14 @@
 
     var containerId = 'chart-v17';
     var animationTimers = [];
+    var isDrawn = false;
 
     // ---- Data ----
     var theorems = [
       { id: 'A', x: 0.08, y: 0.5, label: '定理 A', summary: 'Q \u2209 FP（無條件）', condition: 'unconditional', r: 28 },
-      { id: 'B', x: 0.30, y: 0.25, label: '定理 B', summary: 'm\u2081\u2208FP \u21D2 EXPTIME=PSPACE（無條件）', condition: 'unconditional', r: 26 },
+      { id: 'B', x: 0.30, y: 0.25, label: '定理 B', summary: 'm\u2081\u2208FP \u21D2 EXPTIME=PSPACE（無條件）', condition: 'believed', r: 26 },
       { id: 'C', x: 0.52, y: 0.25, label: '定理 C', summary: 'm\u2082\u2208FP \u21D2 m\u2081\u2208FP（修正版\u2605\u2605）', condition: 'believed', r: 22 },
-      { id: 'D', x: 0.72, y: 0.5, label: '定理 D', summary: 'm\u2082 \u2209 FP（修正版 Robson）', condition: 'conditional', r: 24 },
+      { id: 'D', x: 0.72, y: 0.5, label: '定理 D', summary: 'm\u2082 \u2209 FP（修正版 Robson）', condition: 'unconditional', r: 24 },
       { id: 'E', x: 0.52, y: 0.75, label: '定理 E', summary: 'Q \u2209 P/poly（條件性）', condition: 'conjecture', r: 20 },
       { id: 'F', x: 0.92, y: 0.5, label: '定理 F', summary: '19\u00D719 緊湊公式不可判定', condition: 'independent', r: 18 }
     ];
@@ -5895,6 +5896,7 @@
 
     function destroyChart() {
       clearTimers();
+      isDrawn = false;
       var container = d3.select('#' + containerId);
       container.selectAll('*').remove();
       container.append('div')
@@ -5906,9 +5908,10 @@
 
     // ---- Step updater ----
     window.chartUpdaters['ch8'] = function(stepIndex) {
-      if (stepIndex === 0) {
+      if (stepIndex === 0 && !isDrawn) {
         clearTimers();
         drawAll();
+        isDrawn = true;
       }
     };
   })();
