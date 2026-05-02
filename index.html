@@ -343,6 +343,7 @@
       }
       .interactive-controls,
       .btn-group,
+      .ch1-controls,
       .accordion-btn {
         display: none;
       }
@@ -1547,10 +1548,6 @@
       return { group: group, liberties: libArray };
     }
 
-    function getLibertyCount(x, y, color) {
-      return getGroup(x, y, color).liberties.length;
-    }
-
     // ---- Remove captured stones ----
     function findCaptures(opponentColor) {
       var captured = [];
@@ -1718,6 +1715,7 @@
         }
       }
 
+      // 不實作劫禁規則（5×5 教學用，簡化）
       function handleClick(x, y) {
         if (currentView !== 'v3') return;
         if (board[x][y] !== 0) return;
@@ -1842,7 +1840,7 @@
 
       // Set up a preset board with several groups
       initGameState();
-      // Black group 1: corner cluster (0,0),(1,0),(0,1) — 3 liberties
+      // Black group 1: corner cluster (0,0),(1,0),(0,1) — 2 liberties
       board[0][0] = 1;
       board[1][0] = 1;
       board[0][1] = 1;
