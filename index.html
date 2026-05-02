@@ -1325,7 +1325,11 @@
     };
 
     // ---- Reduced-motion helper ----
-    window.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    window.prefersReducedMotion = motionQuery.matches;
+    motionQuery.addEventListener('change', function(e) {
+      window.prefersReducedMotion = e.matches;
+    });
     window.transDuration = function(ms) {
       return window.prefersReducedMotion ? 0 : ms;
     };
@@ -4356,11 +4360,13 @@
               .attr('r', nodeR + 4)
               .on('end', function() { pulse(g); });
           }
-          var pulseTid = setTimeout(function() {
-            pulse(turtleG);
-            pulse(hareG);
-          }, 450);
-          animationTimers.push(pulseTid);
+          if (!window.prefersReducedMotion) {
+            var pulseTid = setTimeout(function() {
+              pulse(turtleG);
+              pulse(hareG);
+            }, 450);
+            animationTimers.push(pulseTid);
+          }
 
           statusText
             .attr('fill', getColor('--color-pass'))
