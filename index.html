@@ -472,6 +472,80 @@
           </div>
         </div>
       </section>
+
+      <!-- ===== Chapter 6: 次佳手也不行 ===== -->
+      <section class="chapter" id="ch6">
+        <h2 class="chapter-title">Chapter 6：次佳手也不行</h2>
+        <div class="scrolly">
+          <div class="scrolly-text">
+            <!-- Step 0: 定理 C -->
+            <div class="step" data-step="0">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">定理 C：二元分支歸約</h3>
+                <p>想像只有兩間教室 A 和 B，你知道數學課在其中一間。如果有人告訴你體育課（次佳手）在 B 教室，你立刻就知道數學課（最佳手）在 A 教室。所以知道第二名就等於知道第一名。</p>
+                <div class="accordion">
+                  <button class="accordion-btn" aria-expanded="false" aria-controls="ch6-math-panel-0">
+                    <span>查看數學細節</span>
+                    <span aria-hidden="true">&#9662;</span>
+                  </button>
+                  <div class="accordion-panel" id="ch6-math-panel-0" role="region">
+                    <div class="math-content">
+                      <p>$$\text{二元化 ATM 中 } |C(S)|=2,\; m_1 = C(S)\setminus\{m_2\}$$</p>
+                      <p>$$m_2 \in \mathrm{FP} \Rightarrow m_1 \in \mathrm{FP} \Rightarrow \mathrm{EXPTIME} = \mathrm{PSPACE}$$</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 1: 瓶頸構造直覺 -->
+            <div class="step" data-step="1">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">瓶頸構造直覺</h3>
+                <p>想像三個房間 D、A、B。D 裡有一顆巨大的炸彈（n⁴ 子的群），你一定要先去拆彈（m₁=d）。拆完彈之後，第二重要的事（m₂）在 A 還是 B——取決於 ATM 是否接受。</p>
+              </div>
+            </div>
+
+            <!-- Step 2: 接受方向 -->
+            <div class="step" data-step="2">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">接受方向</h3>
+                <p style="color:var(--color-pass)">如果 ATM 接受 → A 區有好手可走 → m₂ 落在 A 區</p>
+              </div>
+            </div>
+
+            <!-- Step 3: 拒絕方向 -->
+            <div class="step" data-step="3">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">拒絕方向</h3>
+                <p style="color:var(--color-critical)">如果 ATM 拒絕 → A 區全是壞手 → m₂ 只能落在 B 區</p>
+                <div class="accordion">
+                  <button class="accordion-btn" aria-expanded="false" aria-controls="ch6-math-panel-3">
+                    <span>查看數學細節</span>
+                    <span aria-hidden="true">&#9662;</span>
+                  </button>
+                  <div class="accordion-panel" id="ch6-math-panel-3" role="region">
+                    <div class="math-content">
+                      <p>$$Q(S^*,d) - Q(S^*,m) \geq 2n^4$$</p>
+                      <p>$$m_2(S^*) \in A \iff \text{ATM 接受 } x$$</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scrolly-chart">
+            <div class="chart-container"
+                 id="chart-v13"
+                 role="img"
+                 aria-label="二元分支歸約動畫與瓶頸構造鳥瞰圖"
+                 aria-live="polite">
+              <div class="chart-skeleton">圖表載入中…</div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer">
@@ -1206,6 +1280,495 @@
       } else if (stepIndex === 1 && currentView !== 'v10') {
         clearTimers();
         drawV10();
+      }
+    };
+  })();
+  </script>
+
+  <!-- ===== Chapter 6: V13 二元分支歸約 + V14 瓶頸構造鳥瞰圖 ===== -->
+  <script>
+  (function() {
+    'use strict';
+
+    // Guard: if D3 failed to load, skip
+    if (typeof d3 === 'undefined') return;
+
+    var containerId = 'chart-v13';
+    var currentView = null; // 'v13' | 'v14'
+    var currentPhase = 0;
+    var animationTimers = [];
+
+    // ---- V13: 二元分支歸約動畫 ----
+    function drawV13() {
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      currentView = 'v13';
+      currentPhase = 0;
+
+      var el = container.node();
+      var w = el.clientWidth || 500;
+      var h = Math.max(300, w * 0.6);
+
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + w + ' ' + h)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svg.append('desc').text('二元分支歸約：兩個教室 A 和 B，依序高亮顯示排除邏輯。');
+
+      var roomW = Math.max(100, w * 0.28);
+      var roomH = Math.max(120, h * 0.4);
+      var fontSize = Math.max(13, Math.min(18, w * 0.035));
+      var labelFontSize = Math.max(11, Math.min(15, w * 0.028));
+      var gap = Math.max(40, w * 0.12);
+      var totalW = roomW * 2 + gap;
+      var startX = (w - totalW) / 2;
+      var roomY = h * 0.2;
+
+      // Room A
+      var roomA = svg.append('g').attr('transform', 'translate(' + startX + ',' + roomY + ')');
+      roomA.append('rect')
+        .attr('width', roomW)
+        .attr('height', roomH)
+        .attr('rx', 8)
+        .attr('fill', getColor('--bg-overlay'))
+        .attr('stroke', getColor('--border-subtle'))
+        .attr('stroke-width', 2)
+        .attr('class', 'room-a-rect');
+
+      roomA.append('text')
+        .attr('x', roomW / 2)
+        .attr('y', roomH / 2)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('font-size', (fontSize + 4) + 'px')
+        .attr('font-weight', '700')
+        .attr('fill', getColor('--text-primary'))
+        .text('教室 A');
+
+      // Room B
+      var roomBx = startX + roomW + gap;
+      var roomB = svg.append('g').attr('transform', 'translate(' + roomBx + ',' + roomY + ')');
+      roomB.append('rect')
+        .attr('width', roomW)
+        .attr('height', roomH)
+        .attr('rx', 8)
+        .attr('fill', getColor('--bg-overlay'))
+        .attr('stroke', getColor('--border-subtle'))
+        .attr('stroke-width', 2)
+        .attr('class', 'room-b-rect');
+
+      roomB.append('text')
+        .attr('x', roomW / 2)
+        .attr('y', roomH / 2)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('font-size', (fontSize + 4) + 'px')
+        .attr('font-weight', '700')
+        .attr('fill', getColor('--text-primary'))
+        .text('教室 B');
+
+      // Label below rooms (initially hidden)
+      var labelB = svg.append('text')
+        .attr('x', roomBx + roomW / 2)
+        .attr('y', roomY + roomH + 30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', labelFontSize + 'px')
+        .attr('font-weight', '600')
+        .attr('fill', getColor('--color-indigo'))
+        .attr('opacity', 0)
+        .text('① 得知：體育課（m₂）在 B');
+
+      var labelA = svg.append('text')
+        .attr('x', startX + roomW / 2)
+        .attr('y', roomY + roomH + 30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', labelFontSize + 'px')
+        .attr('font-weight', '600')
+        .attr('fill', getColor('--color-high'))
+        .attr('opacity', 0)
+        .text('② 排除 → 數學課（m₁）在 A！');
+
+      // Title
+      svg.append('text')
+        .attr('x', w / 2)
+        .attr('y', roomY - 16)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', labelFontSize + 'px')
+        .attr('fill', getColor('--text-secondary'))
+        .text('數學課在其中一間，哪一間？');
+
+      // Phase 1: After 600ms, highlight Room B with indigo
+      var t1 = setTimeout(function() {
+        if (currentView !== 'v13') return;
+        roomB.select('.room-b-rect')
+          .transition().duration(500)
+          .attr('fill', getColor('--color-indigo'))
+          .attr('stroke', getColor('--color-indigo'));
+
+        roomB.select('text')
+          .transition().duration(500)
+          .attr('fill', '#fff');
+
+        labelB.transition().duration(500).attr('opacity', 1);
+      }, 600);
+      animationTimers.push(t1);
+
+      // Phase 2: After 1800ms, highlight Room A with --color-high
+      var t2 = setTimeout(function() {
+        if (currentView !== 'v13') return;
+        roomA.select('.room-a-rect')
+          .transition().duration(500)
+          .attr('fill', getColor('--color-high'))
+          .attr('stroke', getColor('--color-high'));
+
+        roomA.select('text')
+          .transition().duration(500)
+          .attr('fill', '#fff');
+
+        labelA.transition().duration(500).attr('opacity', 1);
+      }, 1800);
+      animationTimers.push(t2);
+    }
+
+    // ---- V14: 瓶頸構造鳥瞰圖 ----
+    var v14Svg = null;
+    var v14Groups = {};
+
+    function drawV14(phase) {
+      var container = d3.select('#' + containerId);
+
+      // If switching from v13 or first draw, rebuild entire SVG
+      if (currentView !== 'v14') {
+        container.selectAll('*').remove();
+        currentView = 'v14';
+        v14Svg = null;
+        v14Groups = {};
+      }
+
+      var el = container.node();
+      var w = el.clientWidth || 500;
+      var h = Math.max(340, w * 0.65);
+
+      var fontSize = Math.max(12, Math.min(16, w * 0.03));
+      var labelFontSize = Math.max(11, Math.min(14, w * 0.026));
+      var regionW = Math.max(80, w * 0.22);
+      var regionH = Math.max(100, h * 0.38);
+      var smallRegionW = Math.max(70, w * 0.18);
+      var smallRegionH = Math.max(80, h * 0.28);
+      var wallThickness = 4;
+
+      // D is center-top, A is bottom-left, B is bottom-right
+      var dX = (w - regionW) / 2;
+      var dY = h * 0.08;
+      var aX = w * 0.1;
+      var aY = h * 0.55;
+      var bX = w - w * 0.1 - smallRegionW;
+      var bY = h * 0.55;
+
+      if (!v14Svg) {
+        v14Svg = container.append('svg')
+          .attr('viewBox', '0 0 ' + w + ' ' + h)
+          .attr('preserveAspectRatio', 'xMidYMid meet');
+
+        v14Svg.append('desc').text('瓶頸構造鳥瞰圖：D（主戰場）、A（衛星）、B（衛星）三個隔離區域。');
+
+        // Title label (changes per phase)
+        v14Groups.titleLabel = v14Svg.append('text')
+          .attr('x', w / 2)
+          .attr('y', h - 10)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', (labelFontSize + 1) + 'px')
+          .attr('font-weight', '600')
+          .attr('fill', getColor('--text-secondary'));
+
+        // Walls between regions (dashed lines)
+        v14Groups.wallDA = v14Svg.append('line')
+          .attr('x1', aX + smallRegionW + 10)
+          .attr('y1', dY + regionH + 4)
+          .attr('x2', dX)
+          .attr('y2', aY - 4)
+          .attr('stroke', getColor('--text-muted'))
+          .attr('stroke-width', wallThickness)
+          .attr('stroke-dasharray', '8 4')
+          .attr('opacity', 0.5);
+
+        v14Groups.wallDB = v14Svg.append('line')
+          .attr('x1', dX + regionW)
+          .attr('y1', dY + regionH + 4)
+          .attr('x2', bX)
+          .attr('y2', bY - 4)
+          .attr('stroke', getColor('--text-muted'))
+          .attr('stroke-width', wallThickness)
+          .attr('stroke-dasharray', '8 4')
+          .attr('opacity', 0.5);
+
+        v14Groups.wallAB = v14Svg.append('line')
+          .attr('x1', aX + smallRegionW + 10)
+          .attr('y1', aY + smallRegionH / 2)
+          .attr('x2', bX - 10)
+          .attr('y2', bY + smallRegionH / 2)
+          .attr('stroke', getColor('--text-muted'))
+          .attr('stroke-width', wallThickness)
+          .attr('stroke-dasharray', '8 4')
+          .attr('opacity', 0.5);
+
+        // Region D (主戰場)
+        v14Groups.dGroup = v14Svg.append('g');
+        v14Groups.dRect = v14Groups.dGroup.append('rect')
+          .attr('x', dX)
+          .attr('y', dY)
+          .attr('width', regionW)
+          .attr('height', regionH)
+          .attr('rx', 8)
+          .attr('fill', getColor('--bg-overlay'))
+          .attr('stroke', getColor('--border-subtle'))
+          .attr('stroke-width', 2);
+
+        v14Groups.dGroup.append('text')
+          .attr('x', dX + regionW / 2)
+          .attr('y', dY + regionH * 0.35)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', (fontSize + 2) + 'px')
+          .attr('font-weight', '700')
+          .attr('fill', getColor('--text-primary'))
+          .text('D（主戰場）');
+
+        v14Groups.dGroup.append('text')
+          .attr('x', dX + regionW / 2)
+          .attr('y', dY + regionH * 0.6)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', labelFontSize + 'px')
+          .attr('fill', getColor('--text-secondary'))
+          .text('\uD83D\uDCA3 n\u2074 子的群');
+
+        // D phase label (below D region)
+        v14Groups.dLabel = v14Groups.dGroup.append('text')
+          .attr('x', dX + regionW / 2)
+          .attr('y', dY + regionH + 20)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', labelFontSize + 'px')
+          .attr('font-weight', '600')
+          .attr('fill', getColor('--color-high'))
+          .attr('opacity', 0);
+
+        // Region A (衛星)
+        v14Groups.aGroup = v14Svg.append('g');
+        v14Groups.aRect = v14Groups.aGroup.append('rect')
+          .attr('x', aX)
+          .attr('y', aY)
+          .attr('width', smallRegionW)
+          .attr('height', smallRegionH)
+          .attr('rx', 8)
+          .attr('fill', getColor('--bg-overlay'))
+          .attr('stroke', getColor('--border-subtle'))
+          .attr('stroke-width', 2);
+
+        v14Groups.aGroup.append('text')
+          .attr('x', aX + smallRegionW / 2)
+          .attr('y', aY + smallRegionH * 0.4)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', fontSize + 'px')
+          .attr('font-weight', '700')
+          .attr('fill', getColor('--text-primary'))
+          .text('A（衛星）');
+
+        v14Groups.aGroup.append('text')
+          .attr('x', aX + smallRegionW / 2)
+          .attr('y', aY + smallRegionH * 0.65)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', (labelFontSize - 1) + 'px')
+          .attr('fill', getColor('--text-secondary'))
+          .text('Robson 構造');
+
+        // A phase label
+        v14Groups.aLabel = v14Groups.aGroup.append('text')
+          .attr('x', aX + smallRegionW / 2)
+          .attr('y', aY + smallRegionH + 18)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', labelFontSize + 'px')
+          .attr('font-weight', '600')
+          .attr('opacity', 0);
+
+        // Region B (衛星)
+        v14Groups.bGroup = v14Svg.append('g');
+        v14Groups.bRect = v14Groups.bGroup.append('rect')
+          .attr('x', bX)
+          .attr('y', bY)
+          .attr('width', smallRegionW)
+          .attr('height', smallRegionH)
+          .attr('rx', 8)
+          .attr('fill', getColor('--bg-overlay'))
+          .attr('stroke', getColor('--border-subtle'))
+          .attr('stroke-width', 2);
+
+        v14Groups.bGroup.append('text')
+          .attr('x', bX + smallRegionW / 2)
+          .attr('y', bY + smallRegionH * 0.4)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', fontSize + 'px')
+          .attr('font-weight', '700')
+          .attr('fill', getColor('--text-primary'))
+          .text('B（衛星）');
+
+        v14Groups.bGroup.append('text')
+          .attr('x', bX + smallRegionW / 2)
+          .attr('y', bY + smallRegionH * 0.65)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', (labelFontSize - 1) + 'px')
+          .attr('fill', getColor('--text-secondary'))
+          .text('單官點');
+
+        // B phase label
+        v14Groups.bLabel = v14Groups.bGroup.append('text')
+          .attr('x', bX + smallRegionW / 2)
+          .attr('y', bY + smallRegionH + 18)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', labelFontSize + 'px')
+          .attr('font-weight', '600')
+          .attr('opacity', 0);
+      }
+
+      // Apply phase transitions
+      currentPhase = phase;
+
+      if (phase === 1) {
+        // Phase 1: Show all three regions, neutral state
+        v14Groups.titleLabel.text('三個隔離的區域');
+
+        v14Groups.dRect
+          .transition().duration(400)
+          .attr('fill', getColor('--bg-overlay'))
+          .attr('stroke', getColor('--border-subtle'));
+
+        v14Groups.aRect
+          .transition().duration(400)
+          .attr('fill', getColor('--bg-overlay'))
+          .attr('stroke', getColor('--border-subtle'));
+
+        v14Groups.bRect
+          .transition().duration(400)
+          .attr('fill', getColor('--bg-overlay'))
+          .attr('stroke', getColor('--border-subtle'));
+
+        v14Groups.dLabel.transition().duration(300).attr('opacity', 0);
+        v14Groups.aLabel.transition().duration(300).attr('opacity', 0);
+        v14Groups.bLabel.transition().duration(300).attr('opacity', 0);
+
+      } else if (phase === 2) {
+        // Phase 2: D highlights orange, then A turns green
+        v14Groups.titleLabel.text('ATM 接受 → m₂ 在 A 區');
+
+        v14Groups.dRect
+          .transition().duration(400)
+          .attr('stroke', getColor('--color-high'))
+          .attr('stroke-width', 3);
+
+        v14Groups.dLabel
+          .text('m₁ = d（一定要先拆彈）')
+          .transition().duration(400)
+          .attr('opacity', 1);
+
+        // Reset B to neutral
+        v14Groups.bRect
+          .transition().duration(400)
+          .attr('fill', getColor('--bg-overlay'))
+          .attr('stroke', getColor('--border-subtle'))
+          .attr('stroke-width', 2);
+
+        v14Groups.bLabel.transition().duration(300).attr('opacity', 0);
+
+        // A turns green after a short delay
+        var t = setTimeout(function() {
+          if (currentView !== 'v14' || currentPhase !== 2) return;
+          v14Groups.aRect
+            .transition().duration(500)
+            .attr('fill', getColor('--color-pass'))
+            .attr('stroke', getColor('--color-pass'));
+
+          v14Groups.aLabel
+            .attr('fill', getColor('--color-pass'))
+            .text('ATM 接受 → m₂ 在 A 區')
+            .transition().duration(500)
+            .attr('opacity', 1);
+        }, 600);
+        animationTimers.push(t);
+
+      } else if (phase === 3) {
+        // Phase 3: A resets, B turns red
+        v14Groups.titleLabel.text('ATM 拒絕 → m₂ 在 B 區');
+
+        v14Groups.dRect
+          .transition().duration(400)
+          .attr('stroke', getColor('--color-high'))
+          .attr('stroke-width', 3);
+
+        v14Groups.dLabel
+          .text('m₁ = d（一定要先拆彈）')
+          .transition().duration(400)
+          .attr('opacity', 1);
+
+        // A resets to neutral
+        v14Groups.aRect
+          .transition().duration(400)
+          .attr('fill', getColor('--bg-overlay'))
+          .attr('stroke', getColor('--border-subtle'))
+          .attr('stroke-width', 2);
+
+        v14Groups.aLabel.transition().duration(300).attr('opacity', 0);
+
+        // B turns red
+        v14Groups.bRect
+          .transition().duration(500)
+          .attr('fill', getColor('--color-critical'))
+          .attr('stroke', getColor('--color-critical'));
+
+        v14Groups.bLabel
+          .attr('fill', getColor('--color-critical'))
+          .text('ATM 拒絕 → m₂ 在 B 區')
+          .transition().duration(500)
+          .attr('opacity', 1);
+      }
+    }
+
+    // ---- Clear timers ----
+    function clearTimers() {
+      animationTimers.forEach(function(t) { clearTimeout(t); });
+      animationTimers = [];
+    }
+
+    // ---- Chart lifecycle ----
+    function initChart() {
+      drawV13();
+    }
+
+    function destroyChart() {
+      clearTimers();
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      container.append('div')
+        .attr('class', 'chart-skeleton')
+        .text('圖表載入中…');
+      currentView = null;
+      currentPhase = 0;
+      v14Svg = null;
+      v14Groups = {};
+    }
+
+    registerChart(containerId, initChart, destroyChart);
+
+    // ---- Step updater ----
+    window.chartUpdaters['ch6'] = function(stepIndex) {
+      clearTimers();
+      if (stepIndex === 0) {
+        if (currentView !== 'v13') {
+          drawV13();
+        }
+      } else if (stepIndex === 1) {
+        drawV14(1);
+      } else if (stepIndex === 2) {
+        drawV14(2);
+      } else if (stepIndex === 3) {
+        drawV14(3);
       }
     };
   })();
