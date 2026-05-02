@@ -2435,14 +2435,16 @@
           .attr('font-weight', 700)
           .text('?');
 
-        // Type label (Max/Min) above node
-        g.append('text')
-          .attr('text-anchor', 'middle')
-          .attr('y', -nodeH / 2 - 6)
-          .attr('fill', node.type === 'max' ? maxColor : minColor)
-          .attr('font-size', labelFontSize)
-          .attr('font-weight', 600)
-          .text(node.type === 'max' ? 'Max' : 'Min');
+        // Type label (Max/Min) above node — suppress for leaf nodes
+        if (!node._isLeaf) {
+          g.append('text')
+            .attr('text-anchor', 'middle')
+            .attr('y', -nodeH / 2 - 6)
+            .attr('fill', node.type === 'max' ? maxColor : minColor)
+            .attr('font-size', labelFontSize)
+            .attr('font-weight', 600)
+            .text(node.type === 'max' ? 'Max' : 'Min');
+        }
 
         // Expand/collapse indicator for non-leaf nodes
         var indicator = null;
@@ -2521,6 +2523,10 @@
           });
           ng.g.on('keydown', function(event) {
             if (event && (event.key === 'Enter' || event.keyCode === 13)) {
+              event.preventDefault();
+              toggleNode(ng.node);
+            }
+            if (event && event.key === ' ') {
               event.preventDefault();
               toggleNode(ng.node);
             }
@@ -2616,7 +2622,7 @@
       var minQ = Math.min.apply(null, qValues);
       var absMax = Math.max(Math.abs(maxQ), Math.abs(minQ));
       // Scale: map [-absMax, absMax] to [chartH, 0]
-      var baseline = paddingTop + chartH * (absMax / (2 * absMax));
+      var baseline = paddingTop + chartH / 2;
       var barW = Math.min(50, chartW / n * 0.7);
       var gap = (chartW - barW * n) / (n + 1);
 
