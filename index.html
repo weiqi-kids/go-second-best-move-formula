@@ -5092,6 +5092,7 @@
 
     // ---- V15: 查表爆炸示意 (growing grid) ----
     function drawV15() {
+      clearTimers();
       var container = d3.select('#' + containerId);
       container.selectAll('*').remove();
       currentView = 'v15';
@@ -5240,6 +5241,7 @@
 
     // ---- V16: 三重鐵壁示意 ----
     function drawV16() {
+      clearTimers();
       var container = d3.select('#' + containerId);
       container.selectAll('*').remove();
       currentView = 'v16';
