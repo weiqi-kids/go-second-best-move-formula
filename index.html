@@ -1184,10 +1184,89 @@
           </div>
         </div>
       </section>
+
+      <!-- ===== Chapter 8: 全景總覽 ===== -->
+      <section class="chapter" id="ch8">
+        <h2 class="chapter-title">Chapter 8：全景總覽</h2>
+        <div class="scrolly">
+          <div class="scrolly-text">
+            <!-- Step 0: 定理地圖 -->
+            <div class="step" data-step="0">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">定理地圖</h3>
+                <p>六個定理（A-F）構成了完整的論證。它們之間有邏輯依賴關係，條件強度也不同——有些是已證的無條件結論，有些依賴廣泛相信但尚未證明的猜想。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="scrolly-chart">
+            <div class="chart-container"
+                 id="chart-v17"
+                 role="img"
+                 aria-label="定理依賴關係圖與條件強度溫度計"
+                 aria-live="polite">
+              <div class="chart-skeleton">圖表載入中…</div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
+    <section class="faq" style="max-width:72rem;margin:2rem auto;padding:0 1rem">
+      <h2 style="font-size:var(--text-xl);font-weight:700;margin-bottom:1rem">常見問題</h2>
+      <div class="accordion">
+        <button class="accordion-btn" aria-expanded="false" aria-controls="faq-panel-0">
+          <span>那 AlphaGo / KataGo 不是做到了嗎？</span>
+          <span aria-hidden="true">&#9662;</span>
+        </button>
+        <div class="accordion-panel" id="faq-panel-0" role="region">
+          <div class="math-content">
+            <p>近似不等於精確。KataGo 提供的是啟發式估計（勝率、目差近似），會犯錯，且無精確度保證。本文的「公式」要求對所有局面精確輸出 m&#x2082;，不允許任何錯誤。</p>
+          </div>
+        </div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-btn" aria-expanded="false" aria-controls="faq-panel-1">
+          <span>那量子電腦呢？</span>
+          <span aria-hidden="true">&#9662;</span>
+        </button>
+        <div class="accordion-panel" id="faq-panel-1" role="region">
+          <div class="math-content">
+            <p>量子電腦能力（BQP）仍在 PSPACE 以內，遠不及 EXPTIME。量子加速不足以攻破圍棋的計算複雜度壁壘。</p>
+          </div>
+        </div>
+      </div>
+      <div class="accordion">
+        <button class="accordion-btn" aria-expanded="false" aria-controls="faq-panel-2">
+          <span>那圍棋收官公式（CGT / 溫度圖）不是存在嗎？</span>
+          <span aria-hidden="true">&#9662;</span>
+        </button>
+        <div class="accordion-panel" id="faq-panel-2" role="region">
+          <div class="math-content">
+            <p>CGT 收官公式適用於可分解的局部終盤（獨立區域之間無交互作用），與本文的全局不存在性結論不矛盾。本文證明的是：對所有合法局面（包括中盤、劫爭糾纏等不可分解的情況）不存在通用公式。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <footer class="site-footer">
-      <p>本文的數學推導由作者與 AI（Claude）協作完成。互動網頁由 AI 輔助設計與開發。</p>
+      <div class="page-wrapper">
+        <p>本文的數學推導由作者與 AI（Claude）協作完成。互動網頁由 AI 輔助設計與開發。</p>
+        <h3>參考文獻</h3>
+        <ol>
+          <li>Robson, J.M. (1983). "The Complexity of Go." IFIP Congress, pp. 413–417.</li>
+          <li>Lichtenstein, D. &amp; Sipser, M. (1980). "GO Is Polynomial-Space Hard." JACM, 27(2).</li>
+          <li>Chandra, A.K., Kozen, D.C. &amp; Stockmeyer, L.J. (1981). "Alternation." JACM, 28(1).</li>
+          <li>Berlekamp, E.R. &amp; Wolfe, D. (1994). Mathematical Go: Chilling Gets the Last Point.</li>
+          <li>Cr&#x00E2;&#x0219;maru, M. &amp; Tromp, J. (2000). "Ladders Are PSPACE-Complete." Computers and Games.</li>
+          <li>Razborov, A.A. &amp; Rudich, S. (1997). "Natural Proofs." JCSS, 55(1).</li>
+          <li>Aaronson, S. &amp; Wigderson, A. (2009). "Algebrization." TOCT, 1(1).</li>
+          <li>Tromp, J. &amp; Farneb&#x00E4;ck, G. (2016). "Combinatorics of Go."</li>
+          <li>Baker, T., Gill, J. &amp; Solovay, R. (1975). "Relativizations of the P =? NP Question." SIAM J. Comput.</li>
+          <li>Buhrman, H., Fortnow, L. &amp; Thierauf, T. (1998). "Nonrelativizing Separations." CCC 1998.</li>
+          <li>Floyd, R.W. (1967). "Nondeterministic Algorithms." JACM, 14(4).</li>
+        </ol>
+      </div>
     </footer>
   </div>
 
@@ -5406,6 +5485,430 @@
       } else if (stepIndex === 1 && currentView !== 'v16') {
         clearTimers();
         drawV16();
+      }
+    };
+  })();
+  </script>
+
+  <!-- ===== Chapter 8: V17 定理依賴關係圖 + V18 條件強度溫度計 ===== -->
+  <script>
+  (function() {
+    'use strict';
+
+    // Guard: if D3 failed to load, skip
+    if (typeof d3 === 'undefined') return;
+
+    var containerId = 'chart-v17';
+    var animationTimers = [];
+
+    // ---- Data ----
+    var theorems = [
+      { id: 'A', x: 0.08, y: 0.5, label: '定理 A', summary: 'Q \u2209 FP（無條件）', condition: 'unconditional', r: 28 },
+      { id: 'B', x: 0.30, y: 0.25, label: '定理 B', summary: 'm\u2081\u2208FP \u21D2 EXPTIME=PSPACE（無條件）', condition: 'unconditional', r: 26 },
+      { id: 'C', x: 0.52, y: 0.25, label: '定理 C', summary: 'm\u2082\u2208FP \u21D2 m\u2081\u2208FP（修正版\u2605\u2605）', condition: 'believed', r: 22 },
+      { id: 'D', x: 0.72, y: 0.5, label: '定理 D', summary: 'm\u2082 \u2209 FP（修正版 Robson）', condition: 'conditional', r: 24 },
+      { id: 'E', x: 0.52, y: 0.75, label: '定理 E', summary: 'Q \u2209 P/poly（條件性）', condition: 'conjecture', r: 20 },
+      { id: 'F', x: 0.92, y: 0.5, label: '定理 F', summary: '19\u00D719 緊湊公式不可判定', condition: 'independent', r: 18 }
+    ];
+
+    var edges = [
+      { from: 'A', to: 'D', label: 'Q的困難性' },
+      { from: 'B', to: 'C', label: '空間壓縮' },
+      { from: 'C', to: 'D', label: '二元分支歸約' }
+    ];
+
+    // ---- Color mapping ----
+    function nodeColor(condition) {
+      switch (condition) {
+        case 'unconditional': return getColor('--color-pass');
+        case 'believed': return getColor('--color-medium');
+        case 'conditional': return getColor('--color-high');
+        case 'conjecture': return getColor('--color-critical');
+        case 'independent': return getColor('--text-muted');
+        default: return getColor('--text-secondary');
+      }
+    }
+
+    // ---- Helper to find theorem by id ----
+    function findThm(id) {
+      for (var i = 0; i < theorems.length; i++) {
+        if (theorems[i].id === id) return theorems[i];
+      }
+      return null;
+    }
+
+    // ---- V17: 定理依賴關係圖 (DAG) ----
+    function drawV17(svg, w, h17) {
+      var g = svg.append('g').attr('class', 'v17-group');
+      var fontSize = Math.max(10, Math.min(14, w * 0.025));
+      var pad = w * 0.06;
+      var chartW = w - pad * 2;
+      var chartH = h17 - pad;
+
+      // Title
+      g.append('text')
+        .attr('x', w / 2)
+        .attr('y', 22)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', fontSize + 2)
+        .attr('font-weight', 700)
+        .attr('fill', getColor('--text-primary'))
+        .text('定理依賴關係圖');
+
+      // Arrow marker
+      var defs = svg.select('defs');
+      if (defs.empty()) {
+        defs = svg.append('defs');
+      }
+      defs.append('marker')
+        .attr('id', 'v17-arrow')
+        .attr('viewBox', '0 0 10 10')
+        .attr('refX', 10)
+        .attr('refY', 5)
+        .attr('markerWidth', 8)
+        .attr('markerHeight', 8)
+        .attr('orient', 'auto-start-reverse')
+        .append('path')
+        .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+        .attr('fill', getColor('--text-muted'));
+
+      // Draw edges first (behind nodes)
+      var edgeGroup = g.append('g').attr('class', 'edges');
+      edges.forEach(function(edge) {
+        var fromThm = findThm(edge.from);
+        var toThm = findThm(edge.to);
+        if (!fromThm || !toThm) return;
+
+        var x1 = pad + fromThm.x * chartW;
+        var y1 = pad + fromThm.y * chartH;
+        var x2 = pad + toThm.x * chartW;
+        var y2 = pad + toThm.y * chartH;
+
+        // Calculate edge endpoints at node borders
+        var dx = x2 - x1;
+        var dy = y2 - y1;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var scale = Math.min(w, h17) / 500;
+        var fromR = fromThm.r * scale;
+        var toR = toThm.r * scale;
+
+        var sx = x1 + (dx / dist) * fromR;
+        var sy = y1 + (dy / dist) * fromR;
+        var ex = x2 - (dx / dist) * (toR + 8);
+        var ey = y2 - (dy / dist) * (toR + 8);
+
+        // Curved path
+        var mx = (sx + ex) / 2;
+        var my = (sy + ey) / 2;
+        var nx = -(ey - sy);
+        var ny = (ex - sx);
+        var nLen = Math.sqrt(nx * nx + ny * ny);
+        var curvature = 0.15;
+        var cx = mx + (nx / nLen) * dist * curvature;
+        var cy = my + (ny / nLen) * dist * curvature;
+
+        var path = edgeGroup.append('path')
+          .attr('d', 'M ' + sx + ' ' + sy + ' Q ' + cx + ' ' + cy + ' ' + ex + ' ' + ey)
+          .attr('fill', 'none')
+          .attr('stroke', getColor('--text-muted'))
+          .attr('stroke-width', 1.5)
+          .attr('marker-end', 'url(#v17-arrow)')
+          .attr('opacity', 0);
+
+        path.transition().delay(1200).duration(600).attr('opacity', 0.7);
+
+        // Edge hover area (wider invisible path for easier hovering)
+        var hoverPath = edgeGroup.append('path')
+          .attr('d', 'M ' + sx + ' ' + sy + ' Q ' + cx + ' ' + cy + ' ' + ex + ' ' + ey)
+          .attr('fill', 'none')
+          .attr('stroke', 'transparent')
+          .attr('stroke-width', 12)
+          .style('cursor', 'pointer');
+
+        hoverPath.on('mouseenter', function(event) {
+          path.attr('stroke-width', 3).attr('opacity', 1);
+          showTooltip(edge.label, event.pageX, event.pageY);
+        }).on('mousemove', function(event) {
+          showTooltip(edge.label, event.pageX, event.pageY);
+        }).on('mouseleave', function() {
+          path.attr('stroke-width', 1.5).attr('opacity', 0.7);
+          hideTooltip();
+        });
+      });
+
+      // Draw nodes
+      var nodeGroup = g.append('g').attr('class', 'nodes');
+      var scale = Math.min(w, h17) / 500;
+
+      theorems.forEach(function(thm, i) {
+        var cx = pad + thm.x * chartW;
+        var cy = pad + thm.y * chartH;
+        var r = thm.r * scale;
+        var color = nodeColor(thm.condition);
+
+        var nodeG = nodeGroup.append('g')
+          .attr('transform', 'translate(' + cx + ',' + cy + ')')
+          .style('cursor', 'pointer')
+          .attr('opacity', 0);
+
+        // Entry animation: fade in left-to-right (200ms delay each)
+        nodeG.transition()
+          .delay(i * 200)
+          .duration(400)
+          .attr('opacity', 1);
+
+        // Circle
+        nodeG.append('circle')
+          .attr('r', r)
+          .attr('fill', color)
+          .attr('fill-opacity', 0.2)
+          .attr('stroke', color)
+          .attr('stroke-width', 2);
+
+        // Label
+        nodeG.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('dy', '0.35em')
+          .attr('font-size', fontSize)
+          .attr('font-weight', 600)
+          .attr('fill', getColor('--text-primary'))
+          .text(thm.id);
+
+        // Hover interactions
+        nodeG.on('mouseenter', function(event) {
+          d3.select(this).select('circle')
+            .attr('fill-opacity', 0.4)
+            .attr('stroke-width', 3);
+          showTooltip('<strong>' + thm.label + '</strong><br>' + thm.summary, event.pageX, event.pageY);
+        }).on('mousemove', function(event) {
+          showTooltip('<strong>' + thm.label + '</strong><br>' + thm.summary, event.pageX, event.pageY);
+        }).on('mouseleave', function() {
+          d3.select(this).select('circle')
+            .attr('fill-opacity', 0.2)
+            .attr('stroke-width', 2);
+          hideTooltip();
+        });
+      });
+    }
+
+    // ---- V18: 條件強度溫度計 ----
+    function drawV18(svg, w, yOffset, h18) {
+      var g = svg.append('g').attr('class', 'v18-group');
+      var fontSize = Math.max(10, Math.min(14, w * 0.025));
+      var pad = w * 0.08;
+
+      // Title
+      g.append('text')
+        .attr('x', w / 2)
+        .attr('y', yOffset + 18)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', fontSize + 2)
+        .attr('font-weight', 700)
+        .attr('fill', getColor('--text-primary'))
+        .text('條件強度溫度計');
+
+      var barX = pad;
+      var barW = w * 0.12;
+      var barTop = yOffset + 36;
+      var barH = h18 - 56;
+      var zoneH = barH / 3;
+
+      // Zone definitions (bottom to top: green, amber, red)
+      var zones = [
+        { label: '無條件（已證）', color: getColor('--color-pass'), y: barTop + zoneH * 2, theorems: ['A', 'D'] },
+        { label: '廣泛相信（未證）', color: getColor('--color-medium'), y: barTop + zoneH, theorems: ['B', 'C'] },
+        { label: '標準猜想', color: getColor('--color-critical'), y: barTop, theorems: ['E'] }
+      ];
+
+      // Draw thermometer bar zones
+      zones.forEach(function(zone, i) {
+        g.append('rect')
+          .attr('x', barX)
+          .attr('y', zone.y)
+          .attr('width', barW)
+          .attr('height', zoneH)
+          .attr('fill', zone.color)
+          .attr('fill-opacity', 0.15)
+          .attr('stroke', zone.color)
+          .attr('stroke-width', 1)
+          .attr('rx', i === 0 ? 0 : (i === 2 ? 6 : 0));
+
+        // Zone label
+        g.append('text')
+          .attr('x', barX + barW + 10)
+          .attr('y', zone.y + zoneH / 2)
+          .attr('dy', '0.35em')
+          .attr('font-size', fontSize - 1)
+          .attr('fill', zone.color)
+          .attr('font-weight', 600)
+          .text(zone.label);
+
+        // Plot theorem dots
+        var dotStartX = barX + barW + 10 + fontSize * 8;
+        zone.theorems.forEach(function(thmId, j) {
+          var thm = findThm(thmId);
+          if (!thm) return;
+          var dotX = dotStartX + j * (fontSize * 4);
+          var dotY = zone.y + zoneH / 2;
+          var dotR = 10;
+
+          var dot = g.append('circle')
+            .attr('cx', dotX)
+            .attr('cy', dotY)
+            .attr('r', dotR)
+            .attr('fill', zone.color)
+            .attr('fill-opacity', 0)
+            .attr('stroke', zone.color)
+            .attr('stroke-width', 1.5)
+            .style('cursor', 'pointer');
+
+          // Auto-play: light up from bottom to top (400ms between each)
+          // Zones are ordered bottom-first, so zone index i: bottom=0, middle=1, top=2
+          var delayBase = i * 800 + j * 400 + 1800; // After V17 animation
+          var tid = setTimeout(function() {
+            dot.transition().duration(400)
+              .attr('fill-opacity', 0.6);
+          }, delayBase);
+          animationTimers.push(tid);
+
+          // Label inside dot
+          g.append('text')
+            .attr('x', dotX)
+            .attr('y', dotY)
+            .attr('dy', '0.35em')
+            .attr('text-anchor', 'middle')
+            .attr('font-size', fontSize - 2)
+            .attr('font-weight', 700)
+            .attr('fill', getColor('--text-primary'))
+            .style('pointer-events', 'none')
+            .text(thmId);
+
+          // Hover
+          dot.on('mouseenter', function(event) {
+            d3.select(this).attr('fill-opacity', 0.85).attr('r', dotR + 3);
+            showTooltip('<strong>' + thm.label + '</strong><br>' + thm.summary, event.pageX, event.pageY);
+          }).on('mousemove', function(event) {
+            showTooltip('<strong>' + thm.label + '</strong><br>' + thm.summary, event.pageX, event.pageY);
+          }).on('mouseleave', function() {
+            d3.select(this).attr('fill-opacity', 0.6).attr('r', dotR);
+            hideTooltip();
+          });
+        });
+      });
+
+      // Theorem F (independent, outside)
+      var fThm = findThm('F');
+      var fX = barX + barW / 2;
+      var fY = barTop - 20;
+      var fColor = getColor('--text-muted');
+
+      g.append('text')
+        .attr('x', barX + barW + 10)
+        .attr('y', fY)
+        .attr('dy', '0.35em')
+        .attr('font-size', fontSize - 1)
+        .attr('fill', fColor)
+        .attr('font-weight', 600)
+        .text('獨立');
+
+      var fDotX = barX + barW + 10 + fontSize * 8;
+      var fDot = g.append('circle')
+        .attr('cx', fDotX)
+        .attr('cy', fY)
+        .attr('r', 10)
+        .attr('fill', fColor)
+        .attr('fill-opacity', 0)
+        .attr('stroke', fColor)
+        .attr('stroke-width', 1.5)
+        .style('cursor', 'pointer');
+
+      var fTid = setTimeout(function() {
+        fDot.transition().duration(400).attr('fill-opacity', 0.6);
+      }, 4200);
+      animationTimers.push(fTid);
+
+      g.append('text')
+        .attr('x', fDotX)
+        .attr('y', fY)
+        .attr('dy', '0.35em')
+        .attr('text-anchor', 'middle')
+        .attr('font-size', fontSize - 2)
+        .attr('font-weight', 700)
+        .attr('fill', getColor('--text-primary'))
+        .style('pointer-events', 'none')
+        .text('F');
+
+      fDot.on('mouseenter', function(event) {
+        d3.select(this).attr('fill-opacity', 0.85).attr('r', 13);
+        showTooltip('<strong>' + fThm.label + '</strong><br>' + fThm.summary, event.pageX, event.pageY);
+      }).on('mousemove', function(event) {
+        showTooltip('<strong>' + fThm.label + '</strong><br>' + fThm.summary, event.pageX, event.pageY);
+      }).on('mouseleave', function() {
+        d3.select(this).attr('fill-opacity', 0.6).attr('r', 10);
+        hideTooltip();
+      });
+    }
+
+    // ---- Combined draw ----
+    function drawAll() {
+      clearTimers();
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+
+      var el = container.node();
+      var w = el.clientWidth || 500;
+      var h17 = Math.max(320, w * 0.55);
+      var h18 = Math.max(200, w * 0.35);
+      var totalH = h17 + h18 + 20;
+
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + w + ' ' + totalH)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svg.append('desc').text('上方：六個定理的邏輯依賴關係圖（DAG），左至右拓撲排列。下方：條件強度溫度計，從無條件到標準猜想。');
+
+      drawV17(svg, w, h17);
+
+      // Divider
+      svg.append('line')
+        .attr('x1', w * 0.1)
+        .attr('x2', w * 0.9)
+        .attr('y1', h17 + 10)
+        .attr('y2', h17 + 10)
+        .attr('stroke', getColor('--border-subtle'))
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '4,4');
+
+      drawV18(svg, w, h17 + 20, h18);
+    }
+
+    // ---- Timer cleanup ----
+    function clearTimers() {
+      animationTimers.forEach(function(t) { clearTimeout(t); });
+      animationTimers = [];
+    }
+
+    // ---- Chart lifecycle ----
+    function initChart() {
+      drawAll();
+    }
+
+    function destroyChart() {
+      clearTimers();
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      container.append('div')
+        .attr('class', 'chart-skeleton')
+        .text('圖表載入中…');
+    }
+
+    registerChart(containerId, initChart, destroyChart);
+
+    // ---- Step updater ----
+    window.chartUpdaters['ch8'] = function(stepIndex) {
+      if (stepIndex === 0) {
+        clearTimers();
+        drawAll();
       }
     };
   })();
