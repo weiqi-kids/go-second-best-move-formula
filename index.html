@@ -511,6 +511,102 @@
       text-align: center;
     }
 
+    /* ===== Ch1: 互動棋盤 + 氣的高亮 ===== */
+    .ch1-board-bg {
+      fill: #e8c97a;
+    }
+    .ch1-grid-line {
+      stroke: #a08040;
+      stroke-width: 0.5;
+    }
+    .ch1-star-point {
+      fill: #a08040;
+    }
+    .ch1-stone {
+      cursor: default;
+      transition: opacity 0.3s;
+    }
+    .ch1-stone-remove {
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .ch1-liberty-dot {
+      fill: #2ecc40;
+      opacity: 0;
+      animation: ch1-pulse 1s ease-in-out infinite;
+    }
+    @keyframes ch1-pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.9; }
+    }
+    .ch1-group-highlight {
+      stroke-width: 3;
+      opacity: 0.5;
+    }
+    .ch1-zero-liberty {
+      animation: ch1-flash-red 0.6s ease-in-out infinite;
+    }
+    @keyframes ch1-flash-red {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .ch1-liberty-count {
+      font-weight: 700;
+      pointer-events: none;
+      user-select: none;
+    }
+    .ch1-controls {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+      justify-content: center;
+    }
+    .ch1-btn {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      background: var(--color-link);
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: var(--text-xs);
+    }
+    .ch1-btn:hover {
+      opacity: 0.9;
+    }
+    .ch1-btn-secondary {
+      background: var(--bg-overlay);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+    }
+    .ch1-btn-secondary:hover {
+      background: var(--bg-hover);
+    }
+    .ch1-shake {
+      animation: ch1-shake-anim 0.4s ease;
+    }
+    @keyframes ch1-shake-anim {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+    }
+    .ch1-turn-indicator {
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+      min-height: 1.4em;
+    }
+    .ch1-v4-hint {
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+
     /* ===== Reduced motion ===== */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -605,6 +701,50 @@
                  id="chart-v1"
                  role="img"
                  aria-label="偏好排序互動與暴力搜尋對比公式示意圖"
+                 aria-live="polite">
+              <div class="chart-skeleton">圖表載入中…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Chapter 1: 什麼是圍棋 ===== -->
+      <section class="chapter" id="ch1">
+        <h2 class="chapter-title">Chapter 1：什麼是圍棋？</h2>
+        <div class="scrolly">
+          <div class="scrolly-text">
+            <!-- Step 0: 棋盤是什麼 -->
+            <div class="step" data-step="0">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">棋盤是什麼</h3>
+                <p>圍棋的棋盤是一個 19×19 的格線（我們用小棋盤 5×5 來示範）。黑白雙方輪流在交叉點上放棋子。</p>
+              </div>
+            </div>
+
+            <!-- Step 1: 怎麼吃子 -->
+            <div class="step" data-step="1">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">怎麼吃子</h3>
+                <p>每組相連的同色棋子形成一個「群」。群旁邊的空交叉點叫做「氣」——可以理解為呼吸的空間。當一個群的氣全部被堵住（0 氣），它就被「吃掉」，從棋盤上移除。</p>
+                <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-top: 0.5rem;">試試右邊的預設按鈕，然後點擊空位完成吃子。</p>
+              </div>
+            </div>
+
+            <!-- Step 2: 怎麼算輸贏 -->
+            <div class="step" data-step="2">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">怎麼算輸贏</h3>
+                <p>怎麼算輸贏——圍地計分。數你圍住的空交叉點（目），減去對方圍的。重點：分數一定是整數（每個空點要麼歸你、要麼歸對方、要麼是中立點）。這個看似平凡的事實，後面會成為關鍵武器。</p>
+                <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-top: 0.5rem;">將滑鼠移到棋子上（或點擊），觀察群和氣的高亮。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="scrolly-chart">
+            <div class="chart-container"
+                 id="chart-v3"
+                 role="img"
+                 aria-label="5×5 互動圍棋棋盤，可放置棋子並觀察吃子規則"
                  aria-live="polite">
               <div class="chart-skeleton">圖表載入中…</div>
             </div>
@@ -1335,6 +1475,608 @@
       } else if (stepIndex === 1 && currentView !== 'v2') {
         clearTimers();
         drawV2();
+      }
+    };
+  })();
+  </script>
+
+  <!-- ===== Chapter 1: V3 互動棋盤 + V4 氣的高亮動畫 ===== -->
+  <script>
+  (function() {
+    'use strict';
+
+    // Guard: if D3 failed to load, skip
+    if (typeof d3 === 'undefined') return;
+
+    var containerId = 'chart-v3';
+    var currentView = null; // 'v3' | 'v4'
+    var animationTimers = [];
+    var BOARD_SIZE = 5;
+
+    // ---- Go game state ----
+    var board; // 5x5: 0=empty, 1=black, 2=white
+    var currentPlayer;
+
+    function initGameState() {
+      board = [];
+      for (var i = 0; i < BOARD_SIZE; i++) {
+        board[i] = [];
+        for (var j = 0; j < BOARD_SIZE; j++) {
+          board[i][j] = 0;
+        }
+      }
+      currentPlayer = 1; // black first
+    }
+
+    // ---- Liberty calculation (BFS flood fill) ----
+    function getGroup(x, y, color) {
+      var visited = {};
+      var group = [];
+      var liberties = {};
+      var queue = [[x, y]];
+      var key = x + ',' + y;
+      visited[key] = true;
+
+      while (queue.length > 0) {
+        var pos = queue.shift();
+        var px = pos[0], py = pos[1];
+        group.push([px, py]);
+
+        var neighbors = [[px-1,py],[px+1,py],[px,py-1],[px,py+1]];
+        for (var i = 0; i < neighbors.length; i++) {
+          var nx = neighbors[i][0], ny = neighbors[i][1];
+          var nkey = nx + ',' + ny;
+          if (nx < 0 || nx >= BOARD_SIZE || ny < 0 || ny >= BOARD_SIZE) continue;
+          if (visited[nkey]) continue;
+          visited[nkey] = true;
+
+          if (board[nx][ny] === 0) {
+            liberties[nkey] = [nx, ny];
+          } else if (board[nx][ny] === color) {
+            queue.push([nx, ny]);
+          }
+        }
+      }
+
+      var libArray = [];
+      for (var lk in liberties) {
+        if (liberties.hasOwnProperty(lk)) {
+          libArray.push(liberties[lk]);
+        }
+      }
+      return { group: group, liberties: libArray };
+    }
+
+    function getLibertyCount(x, y, color) {
+      return getGroup(x, y, color).liberties.length;
+    }
+
+    // ---- Remove captured stones ----
+    function findCaptures(opponentColor) {
+      var captured = [];
+      var checked = {};
+      for (var x = 0; x < BOARD_SIZE; x++) {
+        for (var y = 0; y < BOARD_SIZE; y++) {
+          var key = x + ',' + y;
+          if (board[x][y] === opponentColor && !checked[key]) {
+            var result = getGroup(x, y, opponentColor);
+            for (var g = 0; g < result.group.length; g++) {
+              checked[result.group[g][0] + ',' + result.group[g][1]] = true;
+            }
+            if (result.liberties.length === 0) {
+              captured = captured.concat(result.group);
+            }
+          }
+        }
+      }
+      return captured;
+    }
+
+    // ---- V3: Interactive Go board ----
+    function drawV3() {
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      currentView = 'v3';
+      clearTimers();
+      initGameState();
+
+      var el = container.node();
+      var w = el.clientWidth || 400;
+      var padding = Math.max(20, w * 0.06);
+      var boardW = w;
+      var boardH = w;
+      var cellSize = (boardW - padding * 2) / (BOARD_SIZE - 1);
+      var stoneRadius = cellSize * 0.42;
+
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + boardW + ' ' + boardH)
+        .attr('preserveAspectRatio', 'xMidYMid meet')
+        .style('cursor', 'pointer');
+
+      svg.append('desc').text('5x5 互動圍棋棋盤。點擊交叉點放置黑白棋子。');
+
+      // Board background
+      svg.append('rect')
+        .attr('width', boardW)
+        .attr('height', boardH)
+        .attr('rx', 6)
+        .attr('class', 'ch1-board-bg');
+
+      // Grid lines
+      for (var i = 0; i < BOARD_SIZE; i++) {
+        var pos = padding + i * cellSize;
+        svg.append('line')
+          .attr('x1', padding).attr('y1', pos)
+          .attr('x2', boardW - padding).attr('y2', pos)
+          .attr('class', 'ch1-grid-line');
+        svg.append('line')
+          .attr('x1', pos).attr('y1', padding)
+          .attr('x2', pos).attr('y2', boardH - padding)
+          .attr('class', 'ch1-grid-line');
+      }
+
+      // Star point at center (2,2)
+      svg.append('circle')
+        .attr('cx', padding + 2 * cellSize)
+        .attr('cy', padding + 2 * cellSize)
+        .attr('r', 3)
+        .attr('class', 'ch1-star-point');
+
+      // Stone layer (group for stones)
+      var stoneLayer = svg.append('g').attr('class', 'ch1-stone-layer');
+
+      // Click layer (invisible hit targets)
+      var clickLayer = svg.append('g').attr('class', 'ch1-click-layer');
+
+      // Turn indicator
+      var turnDiv = container.append('div')
+        .attr('class', 'ch1-turn-indicator')
+        .text('黑棋先行');
+
+      // Controls
+      var controlDiv = container.append('div')
+        .attr('class', 'ch1-controls');
+
+      var resetBtn = controlDiv.append('button')
+        .attr('class', 'ch1-btn ch1-btn-secondary')
+        .attr('aria-label', '重置棋盤')
+        .text('重置')
+        .on('click', function() {
+          initGameState();
+          renderBoard();
+          turnDiv.text('黑棋先行');
+        });
+
+      var presetBtns = [
+        { label: '吃一子', fn: loadPresetCapture1 },
+        { label: '吃一串', fn: loadPresetCaptureChain },
+        { label: '互吃', fn: loadPresetMutual }
+      ];
+
+      presetBtns.forEach(function(p) {
+        controlDiv.append('button')
+          .attr('class', 'ch1-btn')
+          .attr('aria-label', '預設：' + p.label)
+          .text(p.label)
+          .on('click', function() {
+            p.fn();
+            renderBoard();
+            turnDiv.text(currentPlayer === 1 ? '黑棋下' : '白棋下');
+          });
+      });
+
+      function toSvgX(bx) { return padding + bx * cellSize; }
+      function toSvgY(by) { return padding + by * cellSize; }
+
+      function renderBoard() {
+        stoneLayer.selectAll('*').remove();
+
+        for (var x = 0; x < BOARD_SIZE; x++) {
+          for (var y = 0; y < BOARD_SIZE; y++) {
+            if (board[x][y] !== 0) {
+              var color = board[x][y];
+              var cx = toSvgX(x);
+              var cy = toSvgY(y);
+
+              var g = stoneLayer.append('g')
+                .attr('class', 'ch1-stone')
+                .attr('transform', 'translate(' + cx + ',' + cy + ')');
+
+              // Shadow
+              g.append('circle')
+                .attr('r', stoneRadius)
+                .attr('cx', 1).attr('cy', 1)
+                .attr('fill', 'rgba(0,0,0,0.15)');
+
+              // Stone body
+              g.append('circle')
+                .attr('r', stoneRadius)
+                .attr('fill', color === 1 ? getColor('--stone-black') : getColor('--stone-white'))
+                .attr('stroke', color === 1 ? '#111' : '#ccc')
+                .attr('stroke-width', 1);
+            }
+          }
+        }
+
+        // Re-create click targets
+        clickLayer.selectAll('*').remove();
+        for (var bx = 0; bx < BOARD_SIZE; bx++) {
+          for (var by = 0; by < BOARD_SIZE; by++) {
+            (function(px, py) {
+              clickLayer.append('rect')
+                .attr('x', toSvgX(px) - cellSize / 2)
+                .attr('y', toSvgY(py) - cellSize / 2)
+                .attr('width', cellSize)
+                .attr('height', cellSize)
+                .attr('fill', 'transparent')
+                .attr('cursor', board[px][py] === 0 ? 'pointer' : 'default')
+                .on('click', function() {
+                  handleClick(px, py);
+                });
+            })(bx, by);
+          }
+        }
+      }
+
+      function handleClick(x, y) {
+        if (currentView !== 'v3') return;
+        if (board[x][y] !== 0) return;
+
+        var color = currentPlayer;
+        var opponent = color === 1 ? 2 : 1;
+
+        // Temporarily place stone
+        board[x][y] = color;
+
+        // Check for opponent captures
+        var opponentCaptures = findCaptures(opponent);
+
+        // Check for suicide
+        var ownResult = getGroup(x, y, color);
+        if (ownResult.liberties.length === 0 && opponentCaptures.length === 0) {
+          // Suicide — reject
+          board[x][y] = 0;
+
+          // Shake animation
+          var svgEl = container.select('svg').node();
+          svgEl.classList.add('ch1-shake');
+          setTimeout(function() {
+            svgEl.classList.remove('ch1-shake');
+          }, 400);
+
+          // Tooltip
+          var rect = svgEl.getBoundingClientRect();
+          var tx = rect.left + rect.width / 2;
+          var ty = rect.top + rect.height / 2;
+          showTooltip('這裡不能下，會自殺！', tx, ty);
+          setTimeout(function() { hideTooltip(); }, 2000);
+          return;
+        }
+
+        // Remove captured opponent stones with animation
+        if (opponentCaptures.length > 0) {
+          // Show tooltip about capture
+          var svgEl2 = container.select('svg').node();
+          var rect2 = svgEl2.getBoundingClientRect();
+          showTooltip('這組棋子的氣被堵住了，所以被吃掉', rect2.left + rect2.width / 2, rect2.top + rect2.height * 0.3);
+          var tid = setTimeout(function() { hideTooltip(); }, 2500);
+          animationTimers.push(tid);
+
+          // Remove captured stones from board
+          for (var c = 0; c < opponentCaptures.length; c++) {
+            board[opponentCaptures[c][0]][opponentCaptures[c][1]] = 0;
+          }
+        }
+
+        // Switch player
+        currentPlayer = opponent;
+        turnDiv.text(currentPlayer === 1 ? '黑棋下' : '白棋下');
+
+        renderBoard();
+      }
+
+      // ---- Preset positions ----
+      function loadPresetCapture1() {
+        // "吃一子": White at (2,2), black at (1,2),(2,1),(2,3). Capture move: (3,2)
+        initGameState();
+        board[2][2] = 2; // white
+        board[1][2] = 1; // black
+        board[2][1] = 1; // black
+        board[2][3] = 1; // black
+        currentPlayer = 1; // black to play at (3,2)
+      }
+
+      function loadPresetCaptureChain() {
+        // "吃一串": 3 white stones in a line at (1,2),(2,2),(3,2)
+        // Black surrounds most liberties
+        initGameState();
+        board[1][2] = 2; // white
+        board[2][2] = 2; // white
+        board[3][2] = 2; // white
+        // Black surrounding
+        board[0][2] = 1;
+        board[1][1] = 1;
+        board[2][1] = 1;
+        board[3][1] = 1;
+        board[4][2] = 1;
+        board[3][3] = 1;
+        board[2][3] = 1;
+        // One liberty left at (1,3) — black plays there to capture
+        currentPlayer = 1;
+      }
+
+      function loadPresetMutual() {
+        // "互吃": Both colors have groups in atari
+        initGameState();
+        // White group in atari: (1,1), surrounded by black (0,1),(1,0),(2,1) — liberty at (1,2)
+        board[1][1] = 2; // white
+        board[0][1] = 1; // black
+        board[1][0] = 1; // black
+        board[2][1] = 1; // black
+        // Black group in atari: (3,3), surrounded by white (2,3),(3,2),(4,3) — liberty at (3,4)
+        board[3][3] = 1; // black
+        board[2][3] = 2; // white
+        board[3][2] = 2; // white
+        board[4][3] = 2; // white
+        currentPlayer = 1; // black can play (1,2) to capture white, or white can play (3,4) to capture black
+      }
+
+      renderBoard();
+    }
+
+    // ---- V4: Liberty highlight board ----
+    function drawV4() {
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      currentView = 'v4';
+      clearTimers();
+
+      var el = container.node();
+      var w = el.clientWidth || 400;
+      var padding = Math.max(20, w * 0.06);
+      var boardW = w;
+      var boardH = w;
+      var cellSize = (boardW - padding * 2) / (BOARD_SIZE - 1);
+      var stoneRadius = cellSize * 0.42;
+      var fontSize = Math.max(11, Math.min(15, w * 0.03));
+
+      // Set up a preset board with several groups
+      initGameState();
+      // Black group 1: corner cluster (0,0),(1,0),(0,1) — 3 liberties
+      board[0][0] = 1;
+      board[1][0] = 1;
+      board[0][1] = 1;
+      // White group 1: (2,0),(3,0),(2,1) — exposed
+      board[2][0] = 2;
+      board[3][0] = 2;
+      board[2][1] = 2;
+      // Black group 2: single stone at (4,4) — 2 liberties (corner)
+      board[4][4] = 1;
+      // White group 3: surrounded - (1,3) surrounded by black (0,3),(1,2),(2,3),(1,4)
+      board[1][3] = 2;
+      board[0][3] = 1;
+      board[1][2] = 1;
+      board[2][3] = 1;
+      board[1][4] = 1;
+      // Black stone at (3,2)
+      board[3][2] = 1;
+
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + boardW + ' ' + boardH)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svg.append('desc').text('5x5 圍棋棋盤，懸停或點擊棋子可查看群和氣的高亮。');
+
+      // Board background
+      svg.append('rect')
+        .attr('width', boardW)
+        .attr('height', boardH)
+        .attr('rx', 6)
+        .attr('class', 'ch1-board-bg');
+
+      // Grid lines
+      for (var i = 0; i < BOARD_SIZE; i++) {
+        var pos = padding + i * cellSize;
+        svg.append('line')
+          .attr('x1', padding).attr('y1', pos)
+          .attr('x2', boardW - padding).attr('y2', pos)
+          .attr('class', 'ch1-grid-line');
+        svg.append('line')
+          .attr('x1', pos).attr('y1', padding)
+          .attr('x2', pos).attr('y2', boardH - padding)
+          .attr('class', 'ch1-grid-line');
+      }
+
+      // Star point
+      svg.append('circle')
+        .attr('cx', padding + 2 * cellSize)
+        .attr('cy', padding + 2 * cellSize)
+        .attr('r', 3)
+        .attr('class', 'ch1-star-point');
+
+      // Highlight layer (behind stones)
+      var highlightLayer = svg.append('g').attr('class', 'ch1-highlight-layer');
+
+      // Stone layer
+      var stoneLayer = svg.append('g').attr('class', 'ch1-stone-layer');
+
+      // Liberty label layer
+      var labelLayer = svg.append('g').attr('class', 'ch1-label-layer');
+
+      function toSvgX(bx) { return padding + bx * cellSize; }
+      function toSvgY(by) { return padding + by * cellSize; }
+
+      var activeHighlight = null; // key of currently highlighted group leader
+
+      function clearHighlights() {
+        highlightLayer.selectAll('*').remove();
+        labelLayer.selectAll('*').remove();
+        // Remove any zero-liberty flash classes
+        stoneLayer.selectAll('.ch1-zero-liberty').classed('ch1-zero-liberty', false);
+        activeHighlight = null;
+      }
+
+      function showGroupHighlight(x, y) {
+        var color = board[x][y];
+        if (color === 0) return;
+
+        var result = getGroup(x, y, color);
+        var groupKey = result.group.map(function(p) { return p[0]+','+p[1]; }).sort().join('|');
+
+        if (activeHighlight === groupKey) return; // already showing
+        clearHighlights();
+        activeHighlight = groupKey;
+
+        var libertyCount = result.liberties.length;
+        var isZero = libertyCount === 0;
+
+        // Highlight group stones
+        result.group.forEach(function(pos) {
+          var cx = toSvgX(pos[0]);
+          var cy = toSvgY(pos[1]);
+
+          highlightLayer.append('circle')
+            .attr('cx', cx)
+            .attr('cy', cy)
+            .attr('r', stoneRadius + 4)
+            .attr('fill', 'none')
+            .attr('stroke', isZero ? getColor('--color-critical') : getColor('--color-info'))
+            .attr('class', 'ch1-group-highlight');
+        });
+
+        // If zero liberties, flash stones red
+        if (isZero) {
+          result.group.forEach(function(pos) {
+            var stoneKey = 'stone-' + pos[0] + '-' + pos[1];
+            stoneLayer.select('#' + stoneKey).classed('ch1-zero-liberty', true);
+          });
+        }
+
+        // Show liberty dots (pulsing green)
+        result.liberties.forEach(function(pos) {
+          highlightLayer.append('circle')
+            .attr('cx', toSvgX(pos[0]))
+            .attr('cy', toSvgY(pos[1]))
+            .attr('r', cellSize * 0.18)
+            .attr('class', 'ch1-liberty-dot');
+        });
+
+        // Show liberty count near the group centroid
+        var sumX = 0, sumY = 0;
+        result.group.forEach(function(pos) {
+          sumX += toSvgX(pos[0]);
+          sumY += toSvgY(pos[1]);
+        });
+        var centX = sumX / result.group.length;
+        var centY = sumY / result.group.length;
+
+        // Position label above the group
+        var labelY = centY - stoneRadius - 10;
+        if (labelY < 15) labelY = centY + stoneRadius + 18;
+
+        labelLayer.append('text')
+          .attr('x', centX)
+          .attr('y', labelY)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', (fontSize + 3) + 'px')
+          .attr('class', 'ch1-liberty-count')
+          .attr('fill', isZero ? getColor('--color-critical') : getColor('--color-pass'))
+          .text(libertyCount + ' 氣');
+      }
+
+      // Render stones with IDs for flash targeting
+      for (var x = 0; x < BOARD_SIZE; x++) {
+        for (var y = 0; y < BOARD_SIZE; y++) {
+          if (board[x][y] !== 0) {
+            var color = board[x][y];
+            var cx = toSvgX(x);
+            var cy = toSvgY(y);
+
+            var g = stoneLayer.append('g')
+              .attr('id', 'stone-' + x + '-' + y)
+              .attr('class', 'ch1-stone')
+              .attr('transform', 'translate(' + cx + ',' + cy + ')')
+              .attr('data-bx', x)
+              .attr('data-by', y)
+              .style('cursor', 'pointer');
+
+            // Shadow
+            g.append('circle')
+              .attr('r', stoneRadius)
+              .attr('cx', 1).attr('cy', 1)
+              .attr('fill', 'rgba(0,0,0,0.15)');
+
+            // Stone body
+            g.append('circle')
+              .attr('r', stoneRadius)
+              .attr('fill', color === 1 ? getColor('--stone-black') : getColor('--stone-white'))
+              .attr('stroke', color === 1 ? '#111' : '#ccc')
+              .attr('stroke-width', 1);
+
+            // Hover / click handlers
+            (function(bx, by) {
+              g.on('mouseenter', function() {
+                showGroupHighlight(bx, by);
+              });
+              g.on('click', function() {
+                // Toggle: if same group, clear; else show
+                var groupColor = board[bx][by];
+                if (groupColor === 0) return;
+                var result = getGroup(bx, by, groupColor);
+                var groupKey = result.group.map(function(p) { return p[0]+','+p[1]; }).sort().join('|');
+                if (activeHighlight === groupKey) {
+                  clearHighlights();
+                } else {
+                  showGroupHighlight(bx, by);
+                }
+              });
+            })(x, y);
+          }
+        }
+      }
+
+      // Clear on mouseleave from SVG (desktop)
+      svg.on('mouseleave', function() {
+        clearHighlights();
+      });
+
+      // Hint text
+      container.append('div')
+        .attr('class', 'ch1-v4-hint')
+        .text('懸停或點擊棋子，查看「群」與「氣」');
+    }
+
+    // ---- Clear timers ----
+    function clearTimers() {
+      animationTimers.forEach(function(t) { clearTimeout(t); });
+      animationTimers = [];
+    }
+
+    // ---- Chart lifecycle ----
+    function initChart() {
+      drawV3();
+    }
+
+    function destroyChart() {
+      clearTimers();
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      container.append('div')
+        .attr('class', 'chart-skeleton')
+        .text('\u5716\u8868\u8F09\u5165\u4E2D\u2026');
+      currentView = null;
+    }
+
+    registerChart(containerId, initChart, destroyChart);
+
+    // ---- Step updater ----
+    window.chartUpdaters['ch1'] = function(stepIndex) {
+      if (stepIndex <= 1 && currentView !== 'v3') {
+        clearTimers();
+        drawV3();
+      } else if (stepIndex === 2 && currentView !== 'v4') {
+        clearTimers();
+        drawV4();
       }
     };
   })();
