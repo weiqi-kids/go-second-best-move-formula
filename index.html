@@ -972,6 +972,87 @@
         </div>
       </section>
 
+      <!-- ===== Chapter 5: 空間壓縮的巧妙 ===== -->
+      <section class="chapter" id="ch5">
+        <h2 class="chapter-title">Chapter 5：空間壓縮的巧妙</h2>
+        <div class="scrolly">
+          <div class="scrolly-text">
+            <!-- Step 0: 為什麼走不完？ -->
+            <div class="step" data-step="0">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">為什麼走不完？</h3>
+                <p>任何 EXPTIME-complete 的博弈，其對弈長度必然是超多項式的。這代表「沿著最佳對弈走到底」的策略，在時間上注定走不完。這不是圍棋的特殊問題，而是所有「超級難」博弈的共同宿命。</p>
+                <div class="accordion">
+                  <button class="accordion-btn" aria-expanded="false" aria-controls="ch5-math-panel-0">
+                    <span>元定理（博弈長度障礙）的簡要證明</span>
+                    <span aria-hidden="true">&#9662;</span>
+                  </button>
+                  <div class="accordion-panel" id="ch5-math-panel-0" role="region">
+                    <div class="math-content">
+                      <p>若博弈 $G$ 為 EXPTIME-complete 且對弈長度 $\ell(n) \le n^c$，則決定勝負可在 $n^{O(c)}$ 時間內完成（逐步模擬），意味 $\mathrm{EXPTIME} \subseteq P$，與時間層級定理矛盾。故 $\ell(n)$ 必為超多項式。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 1: 遊忘模擬 -->
+            <div class="step" data-step="1">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">遊忘模擬</h3>
+                <p>空間壓縮的洞察：不需要走完全程，只需要記得「現在在哪」。模擬最優對弈的空間 = 一個局面的大小 = poly(n)。雖然時間是指數級的，但記憶體只需要多項式！</p>
+                <div class="accordion">
+                  <button class="accordion-btn" aria-expanded="false" aria-controls="ch5-math-panel-1">
+                    <span>演算法 B 的虛擬碼（簡化版）</span>
+                    <span aria-hidden="true">&#9662;</span>
+                  </button>
+                  <div class="accordion-panel" id="ch5-math-panel-1" role="region">
+                    <div class="math-content">
+                      <p>$$\textbf{Algorithm B}(S):$$</p>
+                      <p>$$\quad s \leftarrow S$$</p>
+                      <p>$$\quad \textbf{while } s \text{ 非終局}:$$</p>
+                      <p>$$\qquad m^* \leftarrow \arg\max_m V(s \circ m) \quad \text{// 窮舉所有合法手}$$</p>
+                      <p>$$\qquad s \leftarrow s \circ m^*$$</p>
+                      <p>$$\quad \textbf{return } \text{score}(s)$$</p>
+                      <p>空間只存一個 $s$，大小 $O(n^2)$。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: 龜兔賽跑 -->
+            <div class="step" data-step="2">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">龜兔賽跑</h3>
+                <p>Floyd 循環偵測算法——用龜（每步走 1 格）和兔（每步走 2 格）在軌道上跑。如果軌道有循環，兔子一定會從後面追上烏龜。用這招可以偵測棋局是否進入無限循環。</p>
+                <div class="accordion">
+                  <button class="accordion-btn" aria-expanded="false" aria-controls="ch5-math-panel-2">
+                    <span>龜兔為何一定會相遇</span>
+                    <span aria-hidden="true">&#9662;</span>
+                  </button>
+                  <div class="accordion-panel" id="ch5-math-panel-2" role="region">
+                    <div class="math-content">
+                      <p>設循環長度為 $\lambda$，進入循環前的距離為 $\mu$。在第 $t$ 步，龜在位置 $t$，兔在位置 $2t$。兩者相遇當 $t \equiv 2t \pmod{\lambda}$，即 $t \equiv 0 \pmod{\lambda}$。因此至多 $\mu + \lambda$ 步後必定相遇。額外空間：僅需存兩個指標，$O(n^2)$。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scrolly-chart">
+            <div class="chart-container"
+                 id="chart-v11"
+                 role="img"
+                 aria-label="龜兔賽跑動畫與空間壓縮對比圖"
+                 aria-live="polite">
+              <div class="chart-skeleton">圖表載入中…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ===== Chapter 6: 次佳手也不行 ===== -->
       <section class="chapter" id="ch6">
         <h2 class="chapter-title">Chapter 6：次佳手也不行</h2>
@@ -3881,6 +3962,562 @@
       } else if (stepIndex === 1 && currentView !== 'v10') {
         clearTimers();
         drawV10();
+      }
+    };
+  })();
+  </script>
+
+  <!-- ===== Chapter 5: V11 龜兔賽跑動畫 + V12 空間 vs 時間對比圖 ===== -->
+  <script>
+  (function() {
+    'use strict';
+
+    // Guard: if D3 failed to load, skip
+    if (typeof d3 === 'undefined') return;
+
+    var containerId = 'chart-v11';
+    var currentView = null; // 'v11' | 'v12'
+    var animationTimers = [];
+    var v11Paused = false;
+    var v11Tick = 0;
+    var v12Started = false;
+
+    // ---- V11: 龜兔賽跑動畫 ----
+    function drawV11() {
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      currentView = 'v11';
+      v11Tick = 0;
+      v11Paused = false;
+
+      var el = container.node();
+      var w = el.clientWidth || 500;
+      var h = Math.max(380, w * 0.7);
+
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + w + ' ' + h)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svg.append('desc').text('Floyd 循環偵測：龜與兔在環形軌道上移動，12 步後相遇。');
+
+      var nodeCount = 12;
+      var centerX = w / 2;
+      var centerY = h * 0.44;
+      var radius = Math.min(w, h * 0.8) * 0.3;
+      var nodeR = Math.max(8, radius * 0.1);
+      var fontSize = Math.max(11, Math.min(15, w * 0.028));
+      var labelFontSize = Math.max(18, Math.min(26, w * 0.045));
+
+      // Draw track (circle)
+      svg.append('circle')
+        .attr('cx', centerX)
+        .attr('cy', centerY)
+        .attr('r', radius)
+        .attr('fill', 'none')
+        .attr('stroke', getColor('--border-subtle'))
+        .attr('stroke-width', 2)
+        .attr('stroke-dasharray', '6 3');
+
+      // Compute node positions (0 at top, clockwise)
+      var nodePositions = [];
+      for (var i = 0; i < nodeCount; i++) {
+        var angle = (i / nodeCount) * 2 * Math.PI - Math.PI / 2;
+        nodePositions.push({
+          x: centerX + radius * Math.cos(angle),
+          y: centerY + radius * Math.sin(angle)
+        });
+      }
+
+      // Draw nodes
+      for (var ni = 0; ni < nodeCount; ni++) {
+        svg.append('circle')
+          .attr('cx', nodePositions[ni].x)
+          .attr('cy', nodePositions[ni].y)
+          .attr('r', nodeR)
+          .attr('fill', getColor('--bg-overlay'))
+          .attr('stroke', getColor('--text-secondary'))
+          .attr('stroke-width', 1.5);
+
+        svg.append('text')
+          .attr('x', nodePositions[ni].x)
+          .attr('y', nodePositions[ni].y)
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'central')
+          .attr('font-size', (fontSize - 2) + 'px')
+          .attr('fill', getColor('--text-muted'))
+          .text(ni);
+      }
+
+      // Turtle marker
+      var turtleG = svg.append('g').attr('class', 'v11-turtle');
+      turtleG.append('circle')
+        .attr('r', nodeR + 4)
+        .attr('fill', getColor('--color-pass'))
+        .attr('opacity', 0.85);
+      turtleG.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('font-size', labelFontSize + 'px')
+        .text('\uD83D\uDC22');
+      turtleG.attr('transform', 'translate(' + nodePositions[0].x + ',' + nodePositions[0].y + ')');
+
+      // Hare marker
+      var hareG = svg.append('g').attr('class', 'v11-hare');
+      hareG.append('circle')
+        .attr('r', nodeR + 4)
+        .attr('fill', getColor('--color-info'))
+        .attr('opacity', 0.85);
+      hareG.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('font-size', labelFontSize + 'px')
+        .text('\uD83D\uDC07');
+      hareG.attr('transform', 'translate(' + nodePositions[0].x + ',' + nodePositions[0].y + ')');
+
+      // Tick counter
+      var tickText = svg.append('text')
+        .attr('x', centerX)
+        .attr('y', centerY)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'central')
+        .attr('font-size', Math.max(14, fontSize + 2) + 'px')
+        .attr('font-weight', '700')
+        .attr('fill', getColor('--text-primary'))
+        .text('Tick: 0 / 12');
+
+      // Status text
+      var statusText = svg.append('text')
+        .attr('x', centerX)
+        .attr('y', centerY + 24)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', Math.max(12, fontSize) + 'px')
+        .attr('fill', getColor('--text-secondary'))
+        .text('');
+
+      // Collision glow filter
+      var defs = svg.append('defs');
+      var filter = defs.append('filter').attr('id', 'v11-glow');
+      filter.append('feGaussianBlur').attr('stdDeviation', '3').attr('result', 'blur');
+      var feMerge = filter.append('feMerge');
+      feMerge.append('feMergeNode').attr('in', 'blur');
+      feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+      // Controls
+      var controls = container.append('div')
+        .style('display', 'flex')
+        .style('gap', '0.5rem')
+        .style('justify-content', 'center')
+        .style('margin-top', '0.5rem')
+        .style('flex-wrap', 'wrap');
+
+      var playBtn = controls.append('button')
+        .attr('class', 'accordion-btn')
+        .style('padding', '0.35rem 1rem')
+        .style('font-size', Math.max(13, fontSize) + 'px')
+        .style('cursor', 'pointer')
+        .text('Pause');
+
+      var stepBtn = controls.append('button')
+        .attr('class', 'accordion-btn')
+        .style('padding', '0.35rem 1rem')
+        .style('font-size', Math.max(13, fontSize) + 'px')
+        .style('cursor', 'pointer')
+        .text('Step');
+
+      var replayBtn = controls.append('button')
+        .attr('class', 'accordion-btn')
+        .style('padding', '0.35rem 1rem')
+        .style('font-size', Math.max(13, fontSize) + 'px')
+        .style('cursor', 'pointer')
+        .text('Replay');
+
+      // Legend
+      var legend = container.append('div')
+        .style('display', 'flex')
+        .style('gap', '1.5rem')
+        .style('justify-content', 'center')
+        .style('margin-top', '0.35rem')
+        .style('font-size', Math.max(12, fontSize - 1) + 'px')
+        .style('color', getColor('--text-secondary'));
+
+      legend.append('span').html('\uD83D\uDC22 \u70CF\u9F9C\uFF08\u6BCF\u6B65 1 \u683C\uFF09');
+      legend.append('span').html('\uD83D\uDC07 \u5154\u5B50\uFF08\u6BCF\u6B65 2 \u683C\uFF09');
+
+      var turtlePos = 0;
+      var harePos = 0;
+      var finished = false;
+
+      function advanceTick() {
+        if (finished) return;
+
+        v11Tick++;
+        turtlePos = v11Tick % nodeCount;
+        harePos = (v11Tick * 2) % nodeCount;
+
+        // Move markers with transition
+        turtleG.transition().duration(400).ease(d3.easeCubicInOut)
+          .attr('transform', 'translate(' + nodePositions[turtlePos].x + ',' + nodePositions[turtlePos].y + ')');
+        hareG.transition().duration(400).ease(d3.easeCubicInOut)
+          .attr('transform', 'translate(' + nodePositions[harePos].x + ',' + nodePositions[harePos].y + ')');
+
+        tickText.text('Tick: ' + v11Tick + ' / 12');
+
+        // Check if they meet (after tick 0)
+        if (v11Tick > 0 && turtlePos === harePos) {
+          finished = true;
+          // Apply glow
+          turtleG.attr('filter', 'url(#v11-glow)');
+          hareG.attr('filter', 'url(#v11-glow)');
+
+          // Pulse animation
+          function pulse(g) {
+            g.select('circle')
+              .transition().duration(400)
+              .attr('r', nodeR + 10)
+              .transition().duration(400)
+              .attr('r', nodeR + 4)
+              .on('end', function() { pulse(g); });
+          }
+          var pulseTid = setTimeout(function() {
+            pulse(turtleG);
+            pulse(hareG);
+          }, 450);
+          animationTimers.push(pulseTid);
+
+          statusText
+            .attr('fill', getColor('--color-pass'))
+            .attr('font-weight', '700')
+            .text('\u5075\u6E2C\u5230\u5FAA\u74B0\uFF01');
+
+          playBtn.text('Play').attr('disabled', true);
+          stepBtn.attr('disabled', true);
+          return;
+        }
+
+        statusText.text('\u70CF\u9F9C\u2192\u7BC0\u9EDE ' + turtlePos + '  \u5154\u5B50\u2192\u7BC0\u9EDE ' + harePos);
+      }
+
+      function startAutoPlay() {
+        if (finished || v11Paused) return;
+        var tid = setTimeout(function() {
+          if (!v11Paused && !finished) {
+            advanceTick();
+            startAutoPlay();
+          }
+        }, 800);
+        animationTimers.push(tid);
+      }
+
+      // Play/Pause button
+      playBtn.on('click', function() {
+        if (finished) return;
+        v11Paused = !v11Paused;
+        playBtn.text(v11Paused ? 'Play' : 'Pause');
+        if (!v11Paused) {
+          startAutoPlay();
+        }
+      });
+
+      // Step button
+      stepBtn.on('click', function() {
+        if (finished) return;
+        v11Paused = true;
+        playBtn.text('Play');
+        advanceTick();
+      });
+
+      // Replay button
+      replayBtn.on('click', function() {
+        clearTimers();
+        drawV11();
+      });
+
+      // Auto start
+      startAutoPlay();
+    }
+
+    // ---- V12: 空間 vs 時間對比圖 ----
+    function drawV12() {
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      currentView = 'v12';
+      v12Started = false;
+
+      var el = container.node();
+      var w = el.clientWidth || 500;
+      var h = Math.max(380, w * 0.7);
+
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + w + ' ' + h)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svg.append('desc').text('空間壓縮對比：左側傳統方式記憶體指數爆炸，右側遊忘模擬記憶體保持多項式。');
+
+      var fontSize = Math.max(11, Math.min(15, w * 0.028));
+      var titleFontSize = Math.max(13, Math.min(17, w * 0.032));
+      var halfW = w / 2;
+      var panelPadding = Math.max(12, w * 0.03);
+      var treeTopY = 70;
+
+      // Divider line
+      svg.append('line')
+        .attr('x1', halfW)
+        .attr('y1', 10)
+        .attr('x2', halfW)
+        .attr('y2', h - 10)
+        .attr('stroke', getColor('--border-subtle'))
+        .attr('stroke-width', 1.5)
+        .attr('stroke-dasharray', '4 3');
+
+      // ---- Left panel: 傳統方式 ----
+      svg.append('text')
+        .attr('x', halfW / 2)
+        .attr('y', 30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', titleFontSize + 'px')
+        .attr('font-weight', '700')
+        .attr('fill', getColor('--text-primary'))
+        .text('\u50B3\u7D71\u65B9\u5F0F \u2014 \u5168\u5C55\u958B');
+
+      // Draw expanding binary tree (left side)
+      var treeGroup = svg.append('g').attr('class', 'v12-tree');
+      var treeNodeR = Math.max(5, w * 0.01);
+      var maxDepth = 5;
+      var treeW = halfW - panelPadding * 2;
+      var treeH = h - treeTopY - 80;
+      var levelH = treeH / maxDepth;
+
+      function drawTreeLevel(depth, x, y, spreadX) {
+        if (depth > maxDepth) return;
+
+        // Node
+        treeGroup.append('circle')
+          .attr('cx', x)
+          .attr('cy', y)
+          .attr('r', treeNodeR)
+          .attr('fill', getColor('--color-critical'))
+          .attr('opacity', 0);
+
+        if (depth < maxDepth) {
+          var childY = y + levelH;
+          var childSpread = spreadX / 2;
+          var leftX = x - childSpread;
+          var rightX = x + childSpread;
+
+          // Edges
+          treeGroup.append('line')
+            .attr('x1', x).attr('y1', y)
+            .attr('x2', leftX).attr('y2', childY)
+            .attr('stroke', getColor('--color-critical'))
+            .attr('stroke-width', 1)
+            .attr('opacity', 0);
+
+          treeGroup.append('line')
+            .attr('x1', x).attr('y1', y)
+            .attr('x2', rightX).attr('y2', childY)
+            .attr('stroke', getColor('--color-critical'))
+            .attr('stroke-width', 1)
+            .attr('opacity', 0);
+
+          drawTreeLevel(depth + 1, leftX, childY, childSpread);
+          drawTreeLevel(depth + 1, rightX, childY, childSpread);
+        }
+      }
+
+      var treeRootX = halfW / 2;
+      drawTreeLevel(0, treeRootX, treeTopY, treeW / 2.5);
+
+      // Overflow label (initially hidden)
+      var overflowLabel = svg.append('text')
+        .attr('x', halfW / 2)
+        .attr('y', h - 30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', (fontSize + 1) + 'px')
+        .attr('font-weight', '700')
+        .attr('fill', getColor('--color-critical'))
+        .attr('opacity', 0)
+        .text('\u8A18\u61B6\u9AD4\uFF1A\u6307\u6578\u7D1A \u274C');
+
+      // ---- Right panel: 空間壓縮 ----
+      svg.append('text')
+        .attr('x', halfW + halfW / 2)
+        .attr('y', 30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', titleFontSize + 'px')
+        .attr('font-weight', '700')
+        .attr('fill', getColor('--text-primary'))
+        .text('\u7A7A\u9593\u58D3\u7E2E \u2014 \u904A\u5FD8\u6A21\u64EC');
+
+      // Simple path (right side)
+      var pathY = treeTopY + treeH / 2;
+      var pathStartX = halfW + panelPadding + 20;
+      var pathEndX = w - panelPadding - 20;
+      var pathNodeCount = 8;
+      var pathSpacing = (pathEndX - pathStartX) / (pathNodeCount - 1);
+
+      // Path line
+      svg.append('line')
+        .attr('x1', pathStartX)
+        .attr('y1', pathY)
+        .attr('x2', pathEndX)
+        .attr('y2', pathY)
+        .attr('stroke', getColor('--border-subtle'))
+        .attr('stroke-width', 2);
+
+      // Path nodes
+      for (var pi = 0; pi < pathNodeCount; pi++) {
+        svg.append('circle')
+          .attr('cx', pathStartX + pi * pathSpacing)
+          .attr('cy', pathY)
+          .attr('r', treeNodeR)
+          .attr('fill', getColor('--bg-overlay'))
+          .attr('stroke', getColor('--text-secondary'))
+          .attr('stroke-width', 1);
+      }
+
+      // Moving dot
+      var movingDot = svg.append('circle')
+        .attr('cx', pathStartX)
+        .attr('cy', pathY)
+        .attr('r', treeNodeR + 4)
+        .attr('fill', getColor('--color-pass'))
+        .attr('opacity', 0.9);
+
+      // Memory gauge bar (right side)
+      var gaugeX = halfW + panelPadding + 20;
+      var gaugeY = pathY + 50;
+      var gaugeW = (pathEndX - pathStartX) * 0.8;
+      var gaugeH = Math.max(14, h * 0.035);
+      var gaugeMaxFill = gaugeW * 0.25; // stays small
+
+      svg.append('text')
+        .attr('x', gaugeX)
+        .attr('y', gaugeY - 8)
+        .attr('font-size', (fontSize - 1) + 'px')
+        .attr('fill', getColor('--text-secondary'))
+        .text('\u8A18\u61B6\u9AD4');
+
+      svg.append('rect')
+        .attr('x', gaugeX)
+        .attr('y', gaugeY)
+        .attr('width', gaugeW)
+        .attr('height', gaugeH)
+        .attr('rx', 4)
+        .attr('fill', getColor('--bg-overlay'))
+        .attr('stroke', getColor('--border-subtle'))
+        .attr('stroke-width', 1);
+
+      var gaugeFill = svg.append('rect')
+        .attr('x', gaugeX)
+        .attr('y', gaugeY)
+        .attr('width', gaugeMaxFill * 0.5)
+        .attr('height', gaugeH)
+        .attr('rx', 4)
+        .attr('fill', getColor('--color-pass'));
+
+      var passLabel = svg.append('text')
+        .attr('x', halfW + halfW / 2)
+        .attr('y', h - 30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', (fontSize + 1) + 'px')
+        .attr('font-weight', '700')
+        .attr('fill', getColor('--color-pass'))
+        .attr('opacity', 0)
+        .text('\u8A18\u61B6\u9AD4\uFF1Apoly(n) \u2713');
+
+      // ---- Animation (auto-play on draw) ----
+      function startV12Animation() {
+        if (v12Started) return;
+        v12Started = true;
+
+        // Animate tree nodes appearing level by level
+        var allTreeNodes = treeGroup.selectAll('circle').nodes();
+        var allTreeEdges = treeGroup.selectAll('line').nodes();
+        var allElements = allTreeNodes.concat(allTreeEdges);
+        var totalTreeEls = allElements.length;
+        var treeDelay = 60;
+
+        allElements.forEach(function(el, idx) {
+          var tid = setTimeout(function() {
+            d3.select(el)
+              .transition().duration(300)
+              .attr('opacity', 1);
+          }, idx * treeDelay);
+          animationTimers.push(tid);
+        });
+
+        // Show overflow label after tree finishes
+        var treeFinishTime = totalTreeEls * treeDelay + 400;
+        var overflowTid = setTimeout(function() {
+          overflowLabel.transition().duration(500).attr('opacity', 1);
+        }, treeFinishTime);
+        animationTimers.push(overflowTid);
+
+        // Animate moving dot along path (right side)
+        var dotStep = 0;
+        function moveDot() {
+          if (dotStep >= pathNodeCount) {
+            dotStep = 0; // loop back
+          }
+          var targetX = pathStartX + dotStep * pathSpacing;
+          movingDot.transition().duration(500).ease(d3.easeLinear)
+            .attr('cx', targetX);
+
+          // Jiggle gauge fill to simulate small memory usage
+          var fillW = gaugeMaxFill * (0.4 + 0.2 * Math.sin(dotStep));
+          gaugeFill.transition().duration(500)
+            .attr('width', fillW);
+
+          dotStep++;
+          var tid = setTimeout(moveDot, 700);
+          animationTimers.push(tid);
+        }
+
+        var dotStartTid = setTimeout(function() {
+          moveDot();
+          passLabel.transition().duration(500).attr('opacity', 1);
+        }, 600);
+        animationTimers.push(dotStartTid);
+      }
+
+      // Start immediately
+      startV12Animation();
+    }
+
+    // ---- Clear timers ----
+    function clearTimers() {
+      animationTimers.forEach(function(t) { clearTimeout(t); });
+      animationTimers = [];
+      v11Paused = false;
+      v12Started = false;
+    }
+
+    // ---- Chart lifecycle ----
+    function initChart() {
+      // Default: show V12 (maps to steps 0, 1)
+      drawV12();
+    }
+
+    function destroyChart() {
+      clearTimers();
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      container.append('div')
+        .attr('class', 'chart-skeleton')
+        .text('\u5716\u8868\u8F09\u5165\u4E2D\u2026');
+      currentView = null;
+    }
+
+    registerChart(containerId, initChart, destroyChart);
+
+    // ---- Step updater ----
+    window.chartUpdaters['ch5'] = function(stepIndex) {
+      if (stepIndex <= 1 && currentView !== 'v12') {
+        clearTimers();
+        drawV12();
+      } else if (stepIndex === 2 && currentView !== 'v11') {
+        clearTimers();
+        drawV11();
       }
     };
   })();
