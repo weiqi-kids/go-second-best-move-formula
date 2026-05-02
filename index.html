@@ -361,6 +361,156 @@
       }
     }
 
+    /* ===== Ch0: 偏好排序互動 ===== */
+    .ch0-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .ch0-item {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      background: var(--bg-surface);
+      border: 2px solid var(--border-subtle);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .ch0-item:hover {
+      transform: scale(1.08);
+      border-color: var(--color-link);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .ch0-item.is-selected {
+      opacity: 0.7;
+      cursor: default;
+      transform: none;
+    }
+    .ch0-item.is-selected:hover {
+      border-color: var(--border-subtle);
+      box-shadow: none;
+    }
+    .ch0-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1;
+    }
+    .ch0-result {
+      margin-top: 1rem;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      text-align: center;
+      min-height: 1.6em;
+    }
+    .ch0-reset-btn {
+      display: none;
+      margin: 0.5rem auto 0;
+      padding: 0.3rem 0.8rem;
+      background: var(--bg-overlay);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+    }
+    .ch0-reset-btn:hover {
+      background: var(--bg-hover);
+    }
+
+    /* ===== Ch0: 暴力搜尋 vs 公式 ===== */
+    .ch0-vs-container {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      width: 100%;
+    }
+    .ch0-vs-side {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+    .ch0-vs-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 0 0.5rem;
+    }
+    .ch0-vs-title {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+    .ch0-brute-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      width: 100%;
+      max-width: 180px;
+    }
+    .ch0-brute-box {
+      aspect-ratio: 1;
+      background: var(--bg-overlay);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .ch0-brute-box.is-checked {
+      background: var(--color-medium);
+      border-color: var(--color-medium);
+    }
+    .ch0-brute-box.is-found {
+      background: var(--color-pass);
+      border-color: var(--color-pass);
+    }
+    .ch0-formula-box {
+      width: 100%;
+      max-width: 180px;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .ch0-formula-box.is-visible {
+      opacity: 1;
+    }
+    .ch0-vs-label {
+      margin-top: 0.5rem;
+      font-size: var(--text-xs);
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
     /* ===== Reduced motion ===== */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -426,6 +576,42 @@
     </header>
 
     <main id="main">
+      <!-- ===== Chapter 0: 棋手的疑問 ===== -->
+      <section class="chapter" id="ch0">
+        <h2 class="chapter-title">Chapter 0：棋手的疑問</h2>
+        <div class="scrolly">
+          <div class="scrolly-text">
+            <!-- Step 0: 偏好排序引導 -->
+            <div class="step" data-step="0">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">想像你在玩一個遊戲</h3>
+                <p>你知道有一個「最佳選擇」，但算不出來。退而求其次，你想：第二好的選擇是什麼？</p>
+                <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-top: 0.5rem;">先試試看——依序點擊右邊的 5 個寶箱，排出你的偏好順序。</p>
+              </div>
+            </div>
+
+            <!-- Step 1: 暴力 vs 公式引導 -->
+            <div class="step" data-step="1">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">如果選項有 10<sup>170</sup> 個呢？</h3>
+                <p>你剛才輕鬆排出了 5 個選項的第二名。但如果有 10<sup>170</sup> 個選項呢？逐一嘗試要花多久？有沒有捷徑——一個公式——可以直接算出來？</p>
+                <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-top: 0.5rem;">左邊 = 暴力搜尋（逐一嘗試），右邊 = 公式直達。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="scrolly-chart">
+            <div class="chart-container"
+                 id="chart-v1"
+                 role="img"
+                 aria-label="偏好排序互動與暴力搜尋對比公式示意圖"
+                 aria-live="polite">
+              <div class="chart-skeleton">圖表載入中…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ===== Chapter 4: 為什麼 Q 沒有公式 ===== -->
       <section class="chapter" id="ch4">
         <h2 class="chapter-title">Chapter 4：為什麼 Q 沒有公式</h2>
@@ -899,6 +1085,258 @@
         .delay(idx * 100)
         .attr('r', stoneRadius);
     });
+  })();
+  </script>
+
+  <!-- ===== Chapter 0: V1 偏好排序互動 + V2 暴力搜尋 vs 公式 ===== -->
+  <script>
+  (function() {
+    'use strict';
+
+    var containerId = 'chart-v1';
+    var currentView = null; // 'v1' | 'v2'
+    var animationTimers = [];
+
+    // ---- V1: 偏好排序互動 ----
+    function drawV1() {
+      var container = document.getElementById(containerId);
+      container.innerHTML = '';
+      currentView = 'v1';
+
+      var items = [
+        { emoji: '\uD83C\uDFC6', name: '獎盃' },
+        { emoji: '\uD83D\uDC8E', name: '鑽石' },
+        { emoji: '\uD83C\uDF81', name: '禮物' },
+        { emoji: '\u2B50', name: '星星' },
+        { emoji: '\uD83D\uDD11', name: '鑰匙' }
+      ];
+
+      var selected = [];
+
+      // Build items container
+      var wrapper = document.createElement('div');
+      wrapper.className = 'ch0-items';
+      container.appendChild(wrapper);
+
+      // Result text
+      var resultEl = document.createElement('div');
+      resultEl.className = 'ch0-result';
+      resultEl.textContent = '';
+      container.appendChild(resultEl);
+
+      // Reset button
+      var resetBtn = document.createElement('button');
+      resetBtn.className = 'ch0-reset-btn';
+      resetBtn.textContent = '重新排序';
+      container.appendChild(resetBtn);
+
+      var itemEls = [];
+
+      function getBadgeColor(rank) {
+        if (rank === 1) return getColor('--color-high');
+        if (rank === 2) return getColor('--color-indigo');
+        return getColor('--text-muted');
+      }
+
+      function handleSelect(index) {
+        if (selected.indexOf(index) !== -1) return;
+        if (selected.length >= items.length) return;
+
+        selected.push(index);
+        var rank = selected.length;
+
+        var el = itemEls[index];
+        el.classList.add('is-selected');
+
+        // Add badge
+        var badge = document.createElement('span');
+        badge.className = 'ch0-badge';
+        badge.textContent = '#' + rank;
+        badge.style.background = getBadgeColor(rank);
+        el.appendChild(badge);
+
+        // Check if all selected
+        if (selected.length === items.length) {
+          var secondItem = items[selected[1]];
+          resultEl.textContent = '\u4F60\u7684\u7B2C\u4E8C\u540D\u662F ' + secondItem.emoji + ' ' + secondItem.name + '\uFF01\u4F46\u5982\u679C\u6709 10\xB9\u2077\u2070 \u500B\u9078\u9805\u5462\uFF1F';
+          resultEl.style.color = getColor('--color-indigo');
+          resetBtn.style.display = 'block';
+        }
+      }
+
+      function resetAll() {
+        selected = [];
+        resultEl.textContent = '';
+        resultEl.style.color = '';
+        resetBtn.style.display = 'none';
+        itemEls.forEach(function(el) {
+          el.classList.remove('is-selected');
+          var badge = el.querySelector('.ch0-badge');
+          if (badge) badge.remove();
+        });
+        itemEls[0].focus();
+      }
+
+      resetBtn.addEventListener('click', resetAll);
+
+      items.forEach(function(item, i) {
+        var box = document.createElement('div');
+        box.className = 'ch0-item';
+        box.setAttribute('tabindex', '0');
+        box.setAttribute('role', 'button');
+        box.setAttribute('aria-label', '\u9078\u64C7 ' + item.name);
+        box.textContent = item.emoji;
+
+        box.addEventListener('click', function() {
+          handleSelect(i);
+        });
+        box.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleSelect(i);
+          }
+        });
+
+        wrapper.appendChild(box);
+        itemEls.push(box);
+      });
+    }
+
+    // ---- V2: 暴力搜尋 vs 公式 ----
+    function drawV2() {
+      var container = document.getElementById(containerId);
+      container.innerHTML = '';
+      currentView = 'v2';
+      clearTimers();
+
+      var vsContainer = document.createElement('div');
+      vsContainer.className = 'ch0-vs-container';
+      container.appendChild(vsContainer);
+
+      // Left side: brute force
+      var leftSide = document.createElement('div');
+      leftSide.className = 'ch0-vs-side';
+      vsContainer.appendChild(leftSide);
+
+      var leftTitle = document.createElement('div');
+      leftTitle.className = 'ch0-vs-title';
+      leftTitle.textContent = '\u66B4\u529B\u641C\u5C0B \uD83D\uDC0C';
+      leftSide.appendChild(leftTitle);
+
+      var grid = document.createElement('div');
+      grid.className = 'ch0-brute-grid';
+      leftSide.appendChild(grid);
+
+      var boxes = [];
+      for (var i = 0; i < 12; i++) {
+        var box = document.createElement('div');
+        box.className = 'ch0-brute-box';
+        grid.appendChild(box);
+        boxes.push(box);
+      }
+
+      var leftLabel = document.createElement('div');
+      leftLabel.className = 'ch0-vs-label';
+      leftLabel.textContent = '\u9010\u4E00\u5617\u8A66\uFF0C\u975E\u5E38\u6162...';
+      leftLabel.style.opacity = '0';
+      leftSide.appendChild(leftLabel);
+
+      // Divider
+      var divider = document.createElement('div');
+      divider.className = 'ch0-vs-divider';
+      divider.textContent = 'vs';
+      vsContainer.appendChild(divider);
+
+      // Right side: formula
+      var rightSide = document.createElement('div');
+      rightSide.className = 'ch0-vs-side';
+      vsContainer.appendChild(rightSide);
+
+      var rightTitle = document.createElement('div');
+      rightTitle.className = 'ch0-vs-title';
+      rightTitle.textContent = '\u516C\u5F0F\u76F4\u9054 \u26A1';
+      rightSide.appendChild(rightTitle);
+
+      var formulaBox = document.createElement('div');
+      formulaBox.className = 'ch0-formula-box';
+      formulaBox.style.background = getColor('--color-pass');
+      formulaBox.textContent = 'f(x) = ?';
+      rightSide.appendChild(formulaBox);
+
+      var rightLabel = document.createElement('div');
+      rightLabel.className = 'ch0-vs-label';
+      rightLabel.textContent = '\u4E00\u6B65\u5230\u4F4D\uFF01...\u5982\u679C\u5B58\u5728\u7684\u8A71';
+      rightLabel.style.opacity = '0';
+      rightSide.appendChild(rightLabel);
+
+      // Animate brute force boxes one by one
+      var answerIndex = 6; // Box #7 (0-indexed: 6)
+      boxes.forEach(function(b, idx) {
+        var tid = setTimeout(function() {
+          if (currentView !== 'v2') return;
+          if (idx === answerIndex) {
+            b.classList.add('is-found');
+          } else {
+            b.classList.add('is-checked');
+          }
+        }, (idx + 1) * 300);
+        animationTimers.push(tid);
+      });
+
+      // Show left label after all boxes light up
+      var leftLabelTid = setTimeout(function() {
+        if (currentView !== 'v2') return;
+        leftLabel.style.transition = 'opacity 0.4s';
+        leftLabel.style.opacity = '1';
+      }, 12 * 300 + 200);
+      animationTimers.push(leftLabelTid);
+
+      // Formula box appears after 500ms
+      var formulaTid = setTimeout(function() {
+        if (currentView !== 'v2') return;
+        formulaBox.classList.add('is-visible');
+      }, 500);
+      animationTimers.push(formulaTid);
+
+      // Show right label after formula appears
+      var rightLabelTid = setTimeout(function() {
+        if (currentView !== 'v2') return;
+        rightLabel.style.transition = 'opacity 0.4s';
+        rightLabel.style.opacity = '1';
+      }, 1000);
+      animationTimers.push(rightLabelTid);
+    }
+
+    // ---- Clear timers ----
+    function clearTimers() {
+      animationTimers.forEach(function(t) { clearTimeout(t); });
+      animationTimers = [];
+    }
+
+    // ---- Chart lifecycle ----
+    function initChart() {
+      drawV1();
+    }
+
+    function destroyChart() {
+      clearTimers();
+      var container = document.getElementById(containerId);
+      container.innerHTML = '<div class="chart-skeleton">\u5716\u8868\u8F09\u5165\u4E2D\u2026</div>';
+      currentView = null;
+    }
+
+    registerChart(containerId, initChart, destroyChart);
+
+    // ---- Step updater ----
+    window.chartUpdaters['ch0'] = function(stepIndex) {
+      if (stepIndex === 0 && currentView !== 'v1') {
+        clearTimers();
+        drawV1();
+      } else if (stepIndex === 1 && currentView !== 'v2') {
+        clearTimers();
+        drawV2();
+      }
+    };
   })();
   </script>
 
