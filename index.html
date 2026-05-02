@@ -344,8 +344,10 @@
       .interactive-controls,
       .btn-group,
       .ch1-controls,
-      .accordion-btn {
-        display: none;
+      .accordion-btn,
+      .btn,
+      input[type="range"] {
+        display: none !important;
       }
       .print-fallback {
         display: block;
@@ -773,7 +775,7 @@
                 <p>在一個局面下，你選讓自己分數最大的一手，對手選讓你分數最小的一手。這就是 minimax——最大化自己的最小收益。</p>
                 <div class="accordion">
                   <button class="accordion-btn" aria-expanded="false" aria-controls="ch2-math-panel-1">
-                    <span>查看數學細節</span>
+                    <span>📐 展開數學細節</span>
                     <span aria-hidden="true">&#9662;</span>
                   </button>
                   <div class="accordion-panel" id="ch2-math-panel-1" role="region">
@@ -793,7 +795,7 @@
                 <p>有了每一手棋的價值 Q(S,m)，最好的一手就是 Q 值最高的（m&#8321;），第二好就是排除 m&#8321; 後的最高（m&#8322;）。</p>
                 <div class="accordion">
                   <button class="accordion-btn" aria-expanded="false" aria-controls="ch2-math-panel-2">
-                    <span>查看數學細節</span>
+                    <span>📐 展開數學細節</span>
                     <span aria-hidden="true">&#9662;</span>
                   </button>
                   <div class="accordion-panel" id="ch2-math-panel-2" role="region">
@@ -815,7 +817,7 @@
                 <p>「公式」= 不用暴力搜尋的捷徑，精確定義為 poly(n) 時間。圍棋的計分是整數，所以 Q 值一定是整數。</p>
                 <div class="accordion">
                   <button class="accordion-btn" aria-expanded="false" aria-controls="ch2-math-panel-3">
-                    <span>查看數學細節</span>
+                    <span>📐 展開數學細節</span>
                     <span aria-hidden="true">&#9662;</span>
                   </button>
                   <div class="accordion-panel" id="ch2-math-panel-3" role="region">
@@ -937,7 +939,7 @@
                 <p>假設你有一台能秒算任何圍棋局面價值的神機——這台機器不只是圍棋作弊器，它等於能解開宇宙間所有超難問題。但數學已經證明：這種萬能機器不可能存在。所以神機不存在，公式也不存在。</p>
                 <div class="accordion">
                   <button class="accordion-btn" aria-expanded="false" aria-controls="ch4-math-panel">
-                    <span>查看數學細節</span>
+                    <span>📐 展開數學細節</span>
                     <span aria-hidden="true">&#9662;</span>
                   </button>
                   <div class="accordion-panel" id="ch4-math-panel" role="region">
@@ -1065,7 +1067,7 @@
                 <p>想像只有兩間教室 A 和 B，你知道數學課在其中一間。如果有人告訴你體育課（次佳手）在 B 教室，你立刻就知道數學課（最佳手）在 A 教室。所以知道第二名就等於知道第一名。</p>
                 <div class="accordion">
                   <button class="accordion-btn" aria-expanded="false" aria-controls="ch6-math-panel-0">
-                    <span>查看數學細節</span>
+                    <span>📐 展開數學細節</span>
                     <span aria-hidden="true">&#9662;</span>
                   </button>
                   <div class="accordion-panel" id="ch6-math-panel-0" role="region">
@@ -1101,7 +1103,7 @@
                 <p style="color:var(--color-critical)">如果 ATM 拒絕 → A 區全是壞手 → m₂ 只能落在 B 區</p>
                 <div class="accordion">
                   <button class="accordion-btn" aria-expanded="false" aria-controls="ch6-math-panel-3">
-                    <span>查看數學細節</span>
+                    <span>📐 展開數學細節</span>
                     <span aria-hidden="true">&#9662;</span>
                   </button>
                   <div class="accordion-panel" id="ch6-math-panel-3" role="region">
@@ -1311,11 +1313,21 @@
   (function() {
     'use strict';
 
-    // ---- Color helper ----
+    // ---- Color helper (with cache) ----
     var root = document.documentElement;
+    var colorCache = {};
 
     window.getColor = function(varName) {
-      return getComputedStyle(root).getPropertyValue(varName).trim();
+      if (!colorCache[varName]) {
+        colorCache[varName] = getComputedStyle(root).getPropertyValue(varName).trim();
+      }
+      return colorCache[varName];
+    };
+
+    // ---- Reduced-motion helper ----
+    window.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.transDuration = function(ms) {
+      return window.prefersReducedMotion ? 0 : ms;
     };
 
     // ---- Tooltip ----
@@ -1400,6 +1412,7 @@
     });
 
     // ---- Scrollytelling engine ----
+    var pendingUpdate = null;
     var stepObserver = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
         if (!entry.isIntersecting) return;
@@ -1417,12 +1430,15 @@
         // Activate current step
         step.classList.add('is-active');
 
-        // Call chart updater
+        // Call chart updater (debounced 100ms)
         var stepIndex = parseInt(step.dataset.step, 10);
         var chapterId = chapter.id;
-        if (window.chartUpdaters && window.chartUpdaters[chapterId]) {
-          window.chartUpdaters[chapterId](stepIndex);
-        }
+        clearTimeout(pendingUpdate);
+        pendingUpdate = setTimeout(function() {
+          if (window.chartUpdaters && window.chartUpdaters[chapterId]) {
+            window.chartUpdaters[chapterId](stepIndex);
+          }
+        }, 100);
       });
     }, {
       rootMargin: '-40% 0px -40% 0px',
@@ -1490,9 +1506,11 @@
 
     // ---- Resize handler with 300ms debounce ----
     var resizeTimer;
-    window.addEventListener('resize', function() {
+    function handleResize() {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function() {
+        // Invalidate color cache on resize
+        colorCache = {};
         activeCharts.forEach(function(counter, id) {
           if (chartDestroyFns[id]) chartDestroyFns[id]();
           if (chartInitFns[id]) {
@@ -1500,8 +1518,20 @@
             activeCharts.set(id, chartCounter++);
           }
         });
+        // Re-evaluate which step is active after chart re-init
+        document.querySelectorAll('.step.is-active').forEach(function(step) {
+          var chapter = step.closest('.chapter');
+          if (!chapter) return;
+          var stepIndex = parseInt(step.dataset.step, 10);
+          var chapterId = chapter.id;
+          if (window.chartUpdaters && window.chartUpdaters[chapterId]) {
+            window.chartUpdaters[chapterId](stepIndex);
+          }
+        });
       }, 300);
-    });
+    }
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
 
     // ---- DOMContentLoaded: observe all .step and .chart-container ----
     window.addEventListener('DOMContentLoaded', function() {
@@ -3779,6 +3809,7 @@
         .attr('fill', getColor('--text-secondary'));
 
       // Draw nodes and arrows with staggered animation
+      var reduced = window.prefersReducedMotion;
       nodes.forEach(function(node, i) {
         var cy = startY + i * spacing;
         var isLast = (i === nodeCount - 1);
@@ -3792,26 +3823,28 @@
             .attr('x1', centerX)
             .attr('y1', prevY)
             .attr('x2', centerX)
-            .attr('y2', prevY)
+            .attr('y2', reduced ? curY : prevY)
             .attr('stroke', getColor('--text-secondary'))
             .attr('stroke-width', 2)
             .attr('marker-end', 'url(#arrowhead-v9)')
-            .attr('opacity', 0);
+            .attr('opacity', reduced ? 1 : 0);
 
-          var tid = setTimeout(function() {
-            arrow
-              .transition()
-              .duration(400)
-              .attr('y2', curY)
-              .attr('opacity', 1);
-          }, i * 800 - 400);
-          animationTimers.push(tid);
+          if (!reduced) {
+            var tid = setTimeout(function() {
+              arrow
+                .transition()
+                .duration(transDuration(400))
+                .attr('y2', curY)
+                .attr('opacity', 1);
+            }, i * 800 - 400);
+            animationTimers.push(tid);
+          }
         }
 
         // Node group
         var g = svg.append('g')
           .attr('transform', 'translate(' + centerX + ',' + cy + ')')
-          .attr('opacity', 0);
+          .attr('opacity', reduced ? 1 : 0);
 
         // Rounded rectangle
         g.append('rect')
@@ -3834,12 +3867,14 @@
           .text(node.label);
 
         // Animate in
-        var tid2 = setTimeout(function() {
-          g.transition()
-            .duration(500)
-            .attr('opacity', 1);
-        }, i * 800);
-        animationTimers.push(tid2);
+        if (!reduced) {
+          var tid2 = setTimeout(function() {
+            g.transition()
+              .duration(transDuration(500))
+              .attr('opacity', 1);
+          }, i * 800);
+          animationTimers.push(tid2);
+        }
       });
 
       // Subtitle
@@ -3850,15 +3885,17 @@
         .attr('text-anchor', 'middle')
         .attr('font-size', Math.max(11, fontSize - 2) + 'px')
         .attr('fill', getColor('--text-secondary'))
-        .attr('opacity', 0)
+        .attr('opacity', reduced ? 1 : 0)
         .text('因為 P ⊊ EXPTIME（已證），公式不可能存在');
 
-      var tid3 = setTimeout(function() {
-        subtitle.transition()
-          .duration(600)
-          .attr('opacity', 1);
-      }, nodeCount * 800);
-      animationTimers.push(tid3);
+      if (!reduced) {
+        var tid3 = setTimeout(function() {
+          subtitle.transition()
+            .duration(transDuration(600))
+            .attr('opacity', 1);
+        }, nodeCount * 800);
+        animationTimers.push(tid3);
+      }
     }
 
     // ---- V10: 近似無效示意 ----
@@ -4373,8 +4410,14 @@
         drawV11();
       });
 
-      // Auto start
-      startAutoPlay();
+      // Auto start (skip if reduced motion — show final state)
+      if (window.prefersReducedMotion) {
+        while (!finished) {
+          advanceTick();
+        }
+      } else {
+        startAutoPlay();
+      }
     }
 
     // ---- V12: 空間 vs 時間對比圖 ----
@@ -5061,20 +5104,30 @@
         v14Groups.bLabel.transition().duration(300).attr('opacity', 0);
 
         // A turns green after a short delay
-        var t = setTimeout(function() {
-          if (currentView !== 'v14' || currentPhase !== 2) return;
+        if (window.prefersReducedMotion) {
           v14Groups.aRect
-            .transition().duration(500)
             .attr('fill', getColor('--color-pass'))
             .attr('stroke', getColor('--color-pass'));
-
           v14Groups.aLabel
             .attr('fill', getColor('--color-pass'))
             .text('ATM 接受 → m₂ 在 A 區')
-            .transition().duration(500)
             .attr('opacity', 1);
-        }, 600);
-        animationTimers.push(t);
+        } else {
+          var t = setTimeout(function() {
+            if (currentView !== 'v14' || currentPhase !== 2) return;
+            v14Groups.aRect
+              .transition().duration(500)
+              .attr('fill', getColor('--color-pass'))
+              .attr('stroke', getColor('--color-pass'));
+
+            v14Groups.aLabel
+              .attr('fill', getColor('--color-pass'))
+              .text('ATM 接受 → m₂ 在 A 區')
+              .transition().duration(500)
+              .attr('opacity', 1);
+          }, 600);
+          animationTimers.push(t);
+        }
 
       } else if (phase === 3) {
         // Phase 3: A resets, B turns red
@@ -5287,35 +5340,43 @@
       }
 
       // Initial grid
-      drawGrid(2);
+      if (window.prefersReducedMotion) {
+        // Show final state immediately
+        drawGrid(32);
+        counterText.text('2.08 \u00D7 10\u00B9\u2077\u2070 格');
+        overflowIndicator.attr('opacity', 1);
+        bottomMsg.attr('opacity', 1);
+      } else {
+        drawGrid(2);
 
-      // Animate through sizes
-      sizes.forEach(function(n, i) {
-        if (i === 0) return; // Already drawn 2x2
+        // Animate through sizes
+        sizes.forEach(function(n, i) {
+          if (i === 0) return; // Already drawn 2x2
+          var tid = setTimeout(function() {
+            drawGrid(n);
+            counterText.text(sizeLabels[i]);
+            // Show overflow indicator for large grids
+            if (n >= 16) {
+              overflowIndicator.transition().duration(200).attr('opacity', 1);
+            }
+          }, i * 400);
+          animationTimers.push(tid);
+        });
+
+        // After visible grids, show final labels
+        finalLabels.forEach(function(item, i) {
+          var tid = setTimeout(function() {
+            counterText.text(item.text);
+          }, item.delay * 400);
+          animationTimers.push(tid);
+        });
+
+        // Final message
         var tid = setTimeout(function() {
-          drawGrid(n);
-          counterText.text(sizeLabels[i]);
-          // Show overflow indicator for large grids
-          if (n >= 16) {
-            overflowIndicator.transition().duration(200).attr('opacity', 1);
-          }
-        }, i * 400);
+          bottomMsg.transition().duration(600).attr('opacity', 1);
+        }, 8 * 400);
         animationTimers.push(tid);
-      });
-
-      // After visible grids, show final labels
-      finalLabels.forEach(function(item, i) {
-        var tid = setTimeout(function() {
-          counterText.text(item.text);
-        }, item.delay * 400);
-        animationTimers.push(tid);
-      });
-
-      // Final message
-      var tid = setTimeout(function() {
-        bottomMsg.transition().duration(600).attr('opacity', 1);
-      }, 8 * 400);
-      animationTimers.push(tid);
+      }
     }
 
     // ---- V16: 三重鐵壁示意 ----
@@ -5366,6 +5427,7 @@
       var wallWidth = Math.min(w * 0.25, 140);
       var wallGap = (w - wallCount * wallWidth) / (wallCount + 1);
 
+      var v16Reduced = window.prefersReducedMotion;
       walls.forEach(function(wall, i) {
         var wallHeight = totalWallHeight * wall.heightFrac;
         var wallX = wallGap + i * (wallWidth + wallGap);
@@ -5373,12 +5435,12 @@
 
         var g = svg.append('g');
 
-        // Wall rect — starts at bottom with 0 height, rises up
+        // Wall rect — starts at bottom with 0 height, rises up (or show final if reduced-motion)
         var rect = g.append('rect')
           .attr('x', wallX)
-          .attr('y', bottomY)
+          .attr('y', v16Reduced ? wallTopY : bottomY)
           .attr('width', wallWidth)
-          .attr('height', 0)
+          .attr('height', v16Reduced ? wallHeight : 0)
           .attr('rx', 4)
           .attr('fill', getColor('--bg-overlay'))
           .attr('stroke', getColor('--border-subtle'))
@@ -5393,7 +5455,7 @@
           .attr('font-size', labelFontSize + 'px')
           .attr('font-weight', '700')
           .attr('fill', getColor('--text-primary'))
-          .attr('opacity', 0)
+          .attr('opacity', v16Reduced ? 1 : 0)
           .text(wall.label);
 
         // Citation label
@@ -5404,28 +5466,30 @@
           .attr('dominant-baseline', 'central')
           .attr('font-size', Math.max(9, fontSize - 3) + 'px')
           .attr('fill', getColor('--text-muted'))
-          .attr('opacity', 0)
+          .attr('opacity', v16Reduced ? 1 : 0)
           .text(wall.cite);
 
         // Animate wall rising
-        var tid = setTimeout(function() {
-          rect.transition()
-            .duration(600)
-            .ease(d3.easeCubicOut)
-            .attr('y', wallTopY)
-            .attr('height', wallHeight);
+        if (!v16Reduced) {
+          var tid = setTimeout(function() {
+            rect.transition()
+              .duration(600)
+              .ease(d3.easeCubicOut)
+              .attr('y', wallTopY)
+              .attr('height', wallHeight);
 
-          label.transition()
-            .delay(300)
-            .duration(400)
-            .attr('opacity', 1);
+            label.transition()
+              .delay(300)
+              .duration(400)
+              .attr('opacity', 1);
 
-          cite.transition()
-            .delay(400)
-            .duration(400)
-            .attr('opacity', 1);
-        }, wall.delay);
-        animationTimers.push(tid);
+            cite.transition()
+              .delay(400)
+              .duration(400)
+              .attr('opacity', 1);
+          }, wall.delay);
+          animationTimers.push(tid);
+        }
       });
 
       // Top text: fades in after all walls
@@ -5436,13 +5500,15 @@
         .attr('font-size', Math.max(13, fontSize + 1) + 'px')
         .attr('font-weight', '600')
         .attr('fill', getColor('--color-critical'))
-        .attr('opacity', 0)
+        .attr('opacity', v16Reduced ? 1 : 0)
         .text('19\u00D719 的公式？\u2192 數學目前無法回答。');
 
-      var tid = setTimeout(function() {
-        topText.transition().duration(600).attr('opacity', 1);
-      }, 1200 + 600 + 400); // After last wall finishes
-      animationTimers.push(tid);
+      if (!v16Reduced) {
+        var tid = setTimeout(function() {
+          topText.transition().duration(600).attr('opacity', 1);
+        }, 1200 + 600 + 400); // After last wall finishes
+        animationTimers.push(tid);
+      }
 
       // Ground line
       svg.append('line')
@@ -5765,12 +5831,16 @@
 
           // Auto-play: light up from bottom to top (400ms between each)
           // Zones are ordered bottom-first, so zone index i: bottom=0, middle=1, top=2
-          var delayBase = i * 800 + j * 400 + 1800; // After V17 animation
-          var tid = setTimeout(function() {
-            dot.transition().duration(400)
-              .attr('fill-opacity', 0.6);
-          }, delayBase);
-          animationTimers.push(tid);
+          if (window.prefersReducedMotion) {
+            dot.attr('fill-opacity', 0.6);
+          } else {
+            var delayBase = i * 800 + j * 400 + 1800; // After V17 animation
+            var tid = setTimeout(function() {
+              dot.transition().duration(400)
+                .attr('fill-opacity', 0.6);
+            }, delayBase);
+            animationTimers.push(tid);
+          }
 
           // Label inside dot
           g.append('text')
@@ -5823,10 +5893,14 @@
         .attr('stroke-width', 1.5)
         .style('cursor', 'pointer');
 
-      var fTid = setTimeout(function() {
-        fDot.transition().duration(400).attr('fill-opacity', 0.6);
-      }, 4200);
-      animationTimers.push(fTid);
+      if (window.prefersReducedMotion) {
+        fDot.attr('fill-opacity', 0.6);
+      } else {
+        var fTid = setTimeout(function() {
+          fDot.transition().duration(400).attr('fill-opacity', 0.6);
+        }, 4200);
+        animationTimers.push(fTid);
+      }
 
       g.append('text')
         .attr('x', fDotX)
