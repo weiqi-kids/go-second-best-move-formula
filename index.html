@@ -2935,7 +2935,7 @@
           .attr('cy', cy)
           .attr('rx', layer.rx)
           .attr('ry', layer.ry)
-          .attr('fill', i === 2 ? layer.fill : layer.fill)
+          .attr('fill', layer.fill)
           .attr('fill-opacity', i === 2 ? 0.25 : (i === 1 ? 0.3 : 0.15))
           .attr('stroke', layer.stroke)
           .attr('stroke-width', i === 2 ? 2.5 : 1.5)
@@ -3277,8 +3277,6 @@
 
       // Max display height corresponds to barAreaH
       // We use log scale for display to make it visually meaningful
-      var maxDisplayVal = 900; // n²  at n=30 is 900
-
       function updateChart(n) {
         var polyVal = n * n;
         var expVal = Math.pow(2, n);
@@ -3289,6 +3287,7 @@
         svg.selectAll('.bar-group').remove();
         svg.selectAll('.axis-group').remove();
         svg.selectAll('.overflow-indicator').remove();
+        svg.selectAll('.chart-title').remove();
 
         var g = svg.append('g').attr('class', 'axis-group');
 
@@ -3447,7 +3446,6 @@
         }
 
         // Title
-        svg.selectAll('.chart-title').remove();
         svg.append('text')
           .attr('class', 'chart-title')
           .attr('x', w / 2)
