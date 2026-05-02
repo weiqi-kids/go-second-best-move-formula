@@ -870,6 +870,61 @@
         </div>
       </section>
 
+      <!-- ===== Chapter 3: 計算的極限 ===== -->
+      <section class="chapter" id="ch3">
+        <h2 class="chapter-title">Chapter 3：計算的極限</h2>
+        <div class="scrolly">
+          <div class="scrolly-text">
+            <!-- Step 0: P 與 EXPTIME -->
+            <div class="step" data-step="0">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">P 與 EXPTIME</h3>
+                <p>P 是「快速能解的問題」——像是排序一串數字、查電話簿。EXPTIME 是「慢到不行的問題」——可能要花比宇宙年齡還長的時間。</p>
+              </div>
+            </div>
+
+            <!-- Step 1: P ⊊ EXPTIME -->
+            <div class="step" data-step="1">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">P ⊊ EXPTIME（已證明！）</h3>
+                <p>數學家已經嚴格證明：給電腦更多時間，確實能解更多問題。P 和 EXPTIME 之間有不可跨越的鴻溝。這是時間階層定理——一個已被證明的事實，不是猜想。</p>
+              </div>
+            </div>
+
+            <!-- Step 2: 圍棋 = EXPTIME-complete -->
+            <div class="step" data-step="2">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">圍棋 = EXPTIME-complete</h3>
+                <p>圍棋不只是一個遊戲——數學家發現，你可以把任何超級複雜的計算問題『翻譯』成一盤圍棋。這就像圍棋是一種『通用程式語言』——如果你能秒解圍棋，你等於能秒解世界上所有超難問題。</p>
+                <div class="accordion">
+                  <button class="accordion-btn" aria-expanded="false" aria-controls="ch3-math-panel">
+                    <span>EXPTIME-complete 定義與 Robson 定理</span>
+                    <span aria-hidden="true">&#9662;</span>
+                  </button>
+                  <div class="accordion-panel" id="ch3-math-panel" role="region">
+                    <div class="math-content">
+                      <p><strong>EXPTIME-complete 定義：</strong>一個問題是 EXPTIME-complete，代表它 (1) 屬於 EXPTIME（可以在指數時間內解決），且 (2) EXPTIME 中的任何問題都可以在多項式時間內「歸約」到它。</p>
+                      <p><strong>歸約（Reduction）：</strong>如果問題 A 可以歸約到問題 B，代表我們可以把 A 的任何實例「翻譯」成 B 的實例，使得解決 B 就等於解決 A。翻譯過程本身必須是快速的（多項式時間）。</p>
+                      <p><strong>Robson 定理（1983）：</strong>圍棋的勝負判定問題（Q-DECISION）是 EXPTIME-complete。這意味著圍棋至少跟 EXPTIME 中最難的問題一樣難——不可能有多項式時間的演算法。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scrolly-chart">
+            <div class="chart-container"
+                 id="chart-v7"
+                 role="img"
+                 aria-label="複雜度階層同心圓與時間爆炸動畫"
+                 aria-live="polite">
+              <div class="chart-skeleton">圖表載入中…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ===== Chapter 4: 為什麼 Q 沒有公式 ===== -->
       <section class="chapter" id="ch4">
         <h2 class="chapter-title">Chapter 4：為什麼 Q 沒有公式</h2>
@@ -2793,6 +2848,658 @@
       } else if (stepIndex >= 2 && currentView !== 'v6') {
         clearTimers();
         drawV6();
+      }
+    };
+  })();
+  </script>
+
+  <!-- ===== Chapter 3: V7 複雜度階層同心圓 + V8 時間爆炸動畫 ===== -->
+  <script>
+  (function() {
+    'use strict';
+
+    // Guard: if D3 failed to load, skip
+    if (typeof d3 === 'undefined') return;
+
+    var containerId = 'chart-v7';
+    var currentView = null; // 'v7' | 'v8'
+    var animationTimers = [];
+    var showProven = true; // toggle state for V7
+
+    // ---- V7: 複雜度階層同心圓 ----
+    function drawV7() {
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      currentView = 'v7';
+
+      var el = container.node();
+      var w = el.clientWidth || 500;
+      var totalH = Math.max(550, w * 1.1);
+      var circleAreaH = totalH * 0.6;
+      var compAreaH = totalH * 0.35;
+
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + w + ' ' + totalH)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svg.append('desc').text('複雜度階層同心圓：P、PSPACE、EXPTIME 三層橢圓，圍棋標記在 EXPTIME 邊界。');
+
+      var cx = w / 2;
+      var cy = circleAreaH / 2 + 20;
+
+      // Ellipse radii
+      var rxOuter = w * 0.42;
+      var ryOuter = circleAreaH * 0.42;
+      var rxMiddle = w * 0.29;
+      var ryMiddle = circleAreaH * 0.29;
+      var rxInner = w * 0.16;
+      var ryInner = circleAreaH * 0.16;
+
+      var layers = [
+        {
+          rx: rxOuter, ry: ryOuter,
+          fill: getColor('--bg-overlay'),
+          stroke: getColor('--text-secondary'),
+          dash: '6,4',
+          label: 'EXPTIME',
+          sublabel: '時間要指數級',
+          tooltip: 'EXPTIME：需要指數時間（如 2ⁿ 步）才能解的問題。圍棋的勝負判定就屬於這類。'
+        },
+        {
+          rx: rxMiddle, ry: ryMiddle,
+          fill: getColor('--bg-surface'),
+          stroke: getColor('--text-secondary'),
+          dash: '6,4',
+          label: 'PSPACE',
+          sublabel: '記憶體有限',
+          tooltip: 'PSPACE：用多項式大小的記憶體就能解的問題。是否等於 P 仍是未解之謎。'
+        },
+        {
+          rx: rxInner, ry: ryInner,
+          fill: getColor('--color-pass'),
+          stroke: getColor('--text-primary'),
+          dash: 'none',
+          label: 'P',
+          sublabel: '快速能解',
+          tooltip: 'P：可以在多項式時間（如 n² 或 n³）內解決的問題，例如排序、搜尋。'
+        }
+      ];
+
+      var fontSize = Math.max(12, w * 0.028);
+      var fontSizeSm = Math.max(10, w * 0.022);
+
+      // Draw ellipses from outer to inner
+      layers.forEach(function(layer, i) {
+        var ellipse = svg.append('ellipse')
+          .attr('cx', cx)
+          .attr('cy', cy)
+          .attr('rx', layer.rx)
+          .attr('ry', layer.ry)
+          .attr('fill', i === 2 ? layer.fill : layer.fill)
+          .attr('fill-opacity', i === 2 ? 0.25 : (i === 1 ? 0.3 : 0.15))
+          .attr('stroke', layer.stroke)
+          .attr('stroke-width', i === 2 ? 2.5 : 1.5)
+          .attr('stroke-dasharray', layer.dash)
+          .attr('cursor', 'pointer')
+          .attr('data-tooltip', 'true');
+
+        // Hover tooltip
+        ellipse.on('mouseenter', function(event) {
+          showTooltip(layer.tooltip, event.clientX, event.clientY);
+        });
+        ellipse.on('mousemove', function(event) {
+          showTooltip(layer.tooltip, event.clientX, event.clientY);
+        });
+        ellipse.on('mouseleave', function() {
+          hideTooltip();
+        });
+        // Mobile
+        ellipse.on('touchstart', function(event) {
+          var touch = event.touches[0];
+          showTooltip(layer.tooltip, touch.clientX, touch.clientY);
+        });
+
+        // Label position: place labels at distinctive positions
+        var labelY;
+        if (i === 0) {
+          // EXPTIME: top of outer ellipse
+          labelY = cy - layer.ry + 20;
+        } else if (i === 1) {
+          // PSPACE: top of middle ellipse
+          labelY = cy - layer.ry + 18;
+        } else {
+          // P: center
+          labelY = cy - 8;
+        }
+
+        svg.append('text')
+          .attr('x', cx)
+          .attr('y', labelY)
+          .attr('text-anchor', 'middle')
+          .attr('fill', getColor('--text-primary'))
+          .attr('font-size', fontSize)
+          .attr('font-weight', 700)
+          .attr('pointer-events', 'none')
+          .text(layer.label);
+
+        svg.append('text')
+          .attr('x', cx)
+          .attr('y', labelY + fontSize + 2)
+          .attr('text-anchor', 'middle')
+          .attr('fill', getColor('--text-secondary'))
+          .attr('font-size', fontSizeSm)
+          .attr('pointer-events', 'none')
+          .text(layer.sublabel);
+      });
+
+      // Star marker for 圍棋 Q-DECISION on EXPTIME boundary
+      var starAngle = -Math.PI / 4; // upper-right
+      var starX = cx + rxOuter * Math.cos(starAngle) * 0.92;
+      var starY = cy + ryOuter * Math.sin(starAngle) * 0.92;
+
+      // Draw a small star polygon
+      function starPath(cx, cy, r, points) {
+        var path = '';
+        for (var i = 0; i < points * 2; i++) {
+          var radius = i % 2 === 0 ? r : r * 0.45;
+          var angle = (Math.PI * i) / points - Math.PI / 2;
+          var x = cx + radius * Math.cos(angle);
+          var y = cy + radius * Math.sin(angle);
+          path += (i === 0 ? 'M' : 'L') + x + ',' + y;
+        }
+        return path + 'Z';
+      }
+
+      var starR = Math.max(10, w * 0.022);
+      svg.append('path')
+        .attr('d', starPath(starX, starY, starR, 5))
+        .attr('fill', getColor('--color-critical'))
+        .attr('stroke', 'white')
+        .attr('stroke-width', 1)
+        .attr('cursor', 'pointer')
+        .attr('data-tooltip', 'true')
+        .on('mouseenter', function(event) {
+          showTooltip('圍棋 Q-DECISION 是 EXPTIME-complete：它是 EXPTIME 中最難的問題之一。', event.clientX, event.clientY);
+        })
+        .on('mousemove', function(event) {
+          showTooltip('圍棋 Q-DECISION 是 EXPTIME-complete：它是 EXPTIME 中最難的問題之一。', event.clientX, event.clientY);
+        })
+        .on('mouseleave', function() { hideTooltip(); })
+        .on('touchstart', function(event) {
+          var touch = event.touches[0];
+          showTooltip('圍棋 Q-DECISION 是 EXPTIME-complete：它是 EXPTIME 中最難的問題之一。', touch.clientX, touch.clientY);
+        });
+
+      // Star label
+      svg.append('text')
+        .attr('x', starX + starR + 4)
+        .attr('y', starY + 4)
+        .attr('fill', getColor('--color-critical'))
+        .attr('font-size', fontSizeSm)
+        .attr('font-weight', 700)
+        .attr('pointer-events', 'none')
+        .text('圍棋 Q-DECISION');
+
+      // Separation labels (toggle on click)
+      var separationLabels = svg.append('g').attr('class', 'separation-labels');
+
+      function drawSeparationLabels() {
+        separationLabels.selectAll('*').remove();
+
+        if (showProven) {
+          // P ⊊ EXPTIME: proven
+          var labelX1 = cx + rxOuter * 0.6;
+          var labelY1 = cy + ryOuter * 0.7;
+          separationLabels.append('text')
+            .attr('x', labelX1)
+            .attr('y', labelY1)
+            .attr('text-anchor', 'middle')
+            .attr('fill', getColor('--color-pass'))
+            .attr('font-size', fontSizeSm)
+            .attr('font-weight', 700)
+            .text('P \u228A EXPTIME 已證分離');
+
+          separationLabels.append('line')
+            .attr('x1', labelX1 - 50)
+            .attr('y1', labelY1 + 5)
+            .attr('x2', labelX1 + 50)
+            .attr('y2', labelY1 + 5)
+            .attr('stroke', getColor('--color-pass'))
+            .attr('stroke-width', 2);
+        } else {
+          // P vs PSPACE: conjectured
+          var lx1 = cx - rxMiddle * 0.6;
+          var ly1 = cy + ryMiddle * 0.85;
+          separationLabels.append('text')
+            .attr('x', lx1)
+            .attr('y', ly1)
+            .attr('text-anchor', 'middle')
+            .attr('fill', getColor('--color-medium'))
+            .attr('font-size', fontSizeSm)
+            .attr('font-weight', 600)
+            .text('P \u2260 PSPACE？猜想');
+
+          separationLabels.append('line')
+            .attr('x1', lx1 - 40)
+            .attr('y1', ly1 + 5)
+            .attr('x2', lx1 + 40)
+            .attr('y2', ly1 + 5)
+            .attr('stroke', getColor('--color-medium'))
+            .attr('stroke-width', 1.5)
+            .attr('stroke-dasharray', '4,3');
+
+          // PSPACE vs EXPTIME: conjectured
+          var lx2 = cx + rxOuter * 0.55;
+          var ly2 = cy + ryOuter * 0.7;
+          separationLabels.append('text')
+            .attr('x', lx2)
+            .attr('y', ly2)
+            .attr('text-anchor', 'middle')
+            .attr('fill', getColor('--color-medium'))
+            .attr('font-size', fontSizeSm)
+            .attr('font-weight', 600)
+            .text('PSPACE \u2260 EXPTIME？猜想');
+
+          separationLabels.append('line')
+            .attr('x1', lx2 - 55)
+            .attr('y1', ly2 + 5)
+            .attr('x2', lx2 + 55)
+            .attr('y2', ly2 + 5)
+            .attr('stroke', getColor('--color-medium'))
+            .attr('stroke-width', 1.5)
+            .attr('stroke-dasharray', '4,3');
+        }
+      }
+
+      drawSeparationLabels();
+
+      // Toggle button (click anywhere on SVG toggles)
+      var toggleBtn = svg.append('g')
+        .attr('cursor', 'pointer')
+        .on('click', function() {
+          showProven = !showProven;
+          drawSeparationLabels();
+          toggleText.text(showProven ? '\u2194 \u9EDE\u6B64\u5207\u63DB\uFF1A\u770B\u300C\u731C\u60F3\u5206\u96E2\u300D' : '\u2194 \u9EDE\u6B64\u5207\u63DB\uFF1A\u770B\u300C\u5DF2\u8B49\u5206\u96E2\u300D');
+        });
+
+      toggleBtn.append('rect')
+        .attr('x', cx - 90)
+        .attr('y', circleAreaH - 10)
+        .attr('width', 180)
+        .attr('height', 26)
+        .attr('rx', 13)
+        .attr('fill', getColor('--bg-overlay'))
+        .attr('stroke', getColor('--border-subtle'))
+        .attr('stroke-width', 1);
+
+      var toggleText = toggleBtn.append('text')
+        .attr('x', cx)
+        .attr('y', circleAreaH + 8)
+        .attr('text-anchor', 'middle')
+        .attr('fill', getColor('--text-secondary'))
+        .attr('font-size', Math.max(10, w * 0.02))
+        .text('\u2194 \u9EDE\u6B64\u5207\u63DB\uFF1A\u770B\u300C\u731C\u60F3\u5206\u96E2\u300D');
+
+      // ---- Side comparison boxes ----
+      var compY = circleAreaH + 30;
+      var boxW = (w - 30) / 2;
+      var boxH = compAreaH - 40;
+      var boxR = 8;
+
+      // Left box: 有公式
+      var leftBox = svg.append('g');
+      leftBox.append('rect')
+        .attr('x', 10)
+        .attr('y', compY)
+        .attr('width', boxW)
+        .attr('height', boxH)
+        .attr('rx', boxR)
+        .attr('fill', getColor('--bg-surface'))
+        .attr('stroke', getColor('--color-pass'))
+        .attr('stroke-width', 2);
+
+      leftBox.append('text')
+        .attr('x', 10 + boxW / 2)
+        .attr('y', compY + 24)
+        .attr('text-anchor', 'middle')
+        .attr('fill', getColor('--color-pass'))
+        .attr('font-size', fontSize)
+        .attr('font-weight', 700)
+        .text('\u6709\u516C\u5F0F \u2713');
+
+      leftBox.append('text')
+        .attr('x', 10 + boxW / 2)
+        .attr('y', compY + 50)
+        .attr('text-anchor', 'middle')
+        .attr('fill', getColor('--text-primary'))
+        .attr('font-size', fontSizeSm)
+        .text('Nim\uFF08\u62FF\u77F3\u5B50\uFF09\u3001Wythoff \u535A\u5F08');
+
+      leftBox.append('text')
+        .attr('x', 10 + boxW / 2)
+        .attr('y', compY + 74)
+        .attr('text-anchor', 'middle')
+        .attr('fill', getColor('--text-secondary'))
+        .attr('font-size', fontSizeSm)
+        .text('\u53EF\u5206\u89E3\u70BA\u7368\u7ACB\u5B50\u554F\u984C');
+
+      // Right box: 沒有公式
+      var rightBox = svg.append('g');
+      rightBox.append('rect')
+        .attr('x', 10 + boxW + 10)
+        .attr('y', compY)
+        .attr('width', boxW)
+        .attr('height', boxH)
+        .attr('rx', boxR)
+        .attr('fill', getColor('--bg-surface'))
+        .attr('stroke', getColor('--color-critical'))
+        .attr('stroke-width', 2);
+
+      rightBox.append('text')
+        .attr('x', 10 + boxW + 10 + boxW / 2)
+        .attr('y', compY + 24)
+        .attr('text-anchor', 'middle')
+        .attr('fill', getColor('--color-critical'))
+        .attr('font-size', fontSize)
+        .attr('font-weight', 700)
+        .text('\u6C92\u6709\u516C\u5F0F \u2717');
+
+      rightBox.append('text')
+        .attr('x', 10 + boxW + 10 + boxW / 2)
+        .attr('y', compY + 50)
+        .attr('text-anchor', 'middle')
+        .attr('fill', getColor('--text-primary'))
+        .attr('font-size', fontSizeSm)
+        .text('\u570D\u68CB\u4E2D\u76E4');
+
+      rightBox.append('text')
+        .attr('x', 10 + boxW + 10 + boxW / 2)
+        .attr('y', compY + 74)
+        .attr('text-anchor', 'middle')
+        .attr('fill', getColor('--text-secondary'))
+        .attr('font-size', fontSizeSm)
+        .text('\u5168\u5C40\u7CFE\u7E8F\uFF0C\u4E0D\u53EF\u5206\u89E3');
+    }
+
+    // ---- V8: 時間爆炸動畫 ----
+    function drawV8() {
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      currentView = 'v8';
+
+      var el = container.node();
+      var w = el.clientWidth || 500;
+      var h = Math.max(420, w * 0.8);
+
+      // Create wrapper div for slider controls
+      var controls = container.append('div')
+        .style('padding', '0.5rem 0');
+
+      var sliderLabel = controls.append('div')
+        .style('font-size', 'var(--text-sm)')
+        .style('color', getColor('--text-primary'))
+        .style('margin-bottom', '0.25rem')
+        .style('font-weight', '600');
+
+      var slider = controls.append('input')
+        .attr('type', 'range')
+        .attr('min', 1)
+        .attr('max', 30)
+        .attr('value', 5)
+        .attr('aria-label', '\u8ABF\u6574 n \u7684\u5927\u5C0F\uFF0C\u6BD4\u8F03\u591A\u9805\u5F0F\u8207\u6307\u6578\u589E\u9577')
+        .style('width', '100%');
+
+      var valueDisplay = controls.append('div')
+        .style('font-size', 'var(--text-xs)')
+        .style('color', getColor('--text-secondary'))
+        .style('margin-top', '0.25rem');
+
+      // Chart SVG area
+      var chartH = h - 100;
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + w + ' ' + chartH)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svg.append('desc').text('\u6642\u9593\u7206\u70B8\u52D5\u756B\uFF1A\u5DE6\u68D2 n\u00B2\uFF08\u591A\u9805\u5F0F\uFF09\u8207\u53F3\u68D2 2\u207F\uFF08\u6307\u6578\uFF09\u7684\u9AD8\u5EA6\u6BD4\u8F03\u3002');
+
+      var paddingLeft = 60;
+      var paddingRight = 40;
+      var paddingTop = 40;
+      var paddingBottom = 60;
+      var chartW = w - paddingLeft - paddingRight;
+      var barAreaH = chartH - paddingTop - paddingBottom;
+      var barW = Math.min(80, chartW * 0.2);
+      var barGap = chartW * 0.15;
+
+      // Bar positions
+      var bar1X = paddingLeft + chartW / 2 - barGap / 2 - barW;
+      var bar2X = paddingLeft + chartW / 2 + barGap / 2;
+
+      // Max display height corresponds to barAreaH
+      // We use log scale for display to make it visually meaningful
+      var maxDisplayVal = 900; // n²  at n=30 is 900
+
+      function updateChart(n) {
+        var polyVal = n * n;
+        var expVal = Math.pow(2, n);
+
+        sliderLabel.text('n = ' + n);
+        valueDisplay.text('n\u00B2 = ' + polyVal.toLocaleString() + '\uFF0C2\u207F = ' + (expVal > 1e9 ? expVal.toExponential(2) : expVal.toLocaleString()));
+
+        svg.selectAll('.bar-group').remove();
+        svg.selectAll('.axis-group').remove();
+        svg.selectAll('.overflow-indicator').remove();
+
+        var g = svg.append('g').attr('class', 'axis-group');
+
+        // Y axis
+        g.append('line')
+          .attr('x1', paddingLeft)
+          .attr('y1', paddingTop)
+          .attr('x2', paddingLeft)
+          .attr('y2', paddingTop + barAreaH)
+          .attr('stroke', getColor('--text-secondary'))
+          .attr('stroke-width', 1);
+
+        // Baseline
+        g.append('line')
+          .attr('x1', paddingLeft)
+          .attr('y1', paddingTop + barAreaH)
+          .attr('x2', w - paddingRight)
+          .attr('y2', paddingTop + barAreaH)
+          .attr('stroke', getColor('--text-secondary'))
+          .attr('stroke-width', 1);
+
+        // Determine scale: cap so polynomial bar stays visible
+        // When exp >> poly, cap scale to show poly meaningfully
+        var scaleMax;
+        var overflow = false;
+        if (expVal <= polyVal * 3) {
+          // Both fit comfortably
+          scaleMax = Math.max(polyVal, expVal) * 1.2;
+        } else {
+          // Exponential dominates — cap scale to poly * 5 so poly bar is visible
+          scaleMax = polyVal * 5;
+          overflow = true;
+        }
+        if (scaleMax < 10) scaleMax = 10;
+
+        function valToH(v) {
+          var ratio = v / scaleMax;
+          if (ratio > 1) ratio = 1;
+          return ratio * barAreaH;
+        }
+
+        var polyH = valToH(polyVal);
+        var expH = valToH(expVal);
+
+        var barGroup = svg.append('g').attr('class', 'bar-group');
+
+        // Polynomial bar (blue)
+        barGroup.append('rect')
+          .attr('x', bar1X)
+          .attr('y', paddingTop + barAreaH - polyH)
+          .attr('width', barW)
+          .attr('height', Math.max(1, polyH))
+          .attr('rx', 4)
+          .attr('fill', getColor('--color-info'))
+          .attr('fill-opacity', 0.8);
+
+        // Poly label on bar
+        barGroup.append('text')
+          .attr('x', bar1X + barW / 2)
+          .attr('y', paddingTop + barAreaH - polyH - 8)
+          .attr('text-anchor', 'middle')
+          .attr('fill', getColor('--color-info'))
+          .attr('font-size', Math.max(11, w * 0.024))
+          .attr('font-weight', 600)
+          .text(polyVal.toLocaleString());
+
+        // Poly bottom label
+        barGroup.append('text')
+          .attr('x', bar1X + barW / 2)
+          .attr('y', paddingTop + barAreaH + 20)
+          .attr('text-anchor', 'middle')
+          .attr('fill', getColor('--color-info'))
+          .attr('font-size', Math.max(11, w * 0.024))
+          .attr('font-weight', 700)
+          .text('n\u00B2');
+
+        barGroup.append('text')
+          .attr('x', bar1X + barW / 2)
+          .attr('y', paddingTop + barAreaH + 38)
+          .attr('text-anchor', 'middle')
+          .attr('fill', getColor('--text-secondary'))
+          .attr('font-size', Math.max(10, w * 0.02))
+          .text('\u591A\u9805\u5F0F');
+
+        // Exponential bar (red)
+        barGroup.append('rect')
+          .attr('x', bar2X)
+          .attr('y', paddingTop + barAreaH - expH)
+          .attr('width', barW)
+          .attr('height', Math.max(1, expH))
+          .attr('rx', 4)
+          .attr('fill', getColor('--color-critical'))
+          .attr('fill-opacity', 0.8);
+
+        // Exp label on bar
+        if (!overflow) {
+          barGroup.append('text')
+            .attr('x', bar2X + barW / 2)
+            .attr('y', paddingTop + barAreaH - expH - 8)
+            .attr('text-anchor', 'middle')
+            .attr('fill', getColor('--color-critical'))
+            .attr('font-size', Math.max(11, w * 0.024))
+            .attr('font-weight', 600)
+            .text(expVal > 1e9 ? expVal.toExponential(1) : expVal.toLocaleString());
+        }
+
+        // Exp bottom label
+        barGroup.append('text')
+          .attr('x', bar2X + barW / 2)
+          .attr('y', paddingTop + barAreaH + 20)
+          .attr('text-anchor', 'middle')
+          .attr('fill', getColor('--color-critical'))
+          .attr('font-size', Math.max(11, w * 0.024))
+          .attr('font-weight', 700)
+          .text('2\u207F');
+
+        barGroup.append('text')
+          .attr('x', bar2X + barW / 2)
+          .attr('y', paddingTop + barAreaH + 38)
+          .attr('text-anchor', 'middle')
+          .attr('fill', getColor('--text-secondary'))
+          .attr('font-size', Math.max(10, w * 0.02))
+          .text('\u6307\u6578');
+
+        // Overflow indicator: arrow at top
+        if (overflow) {
+          var arrowG = svg.append('g').attr('class', 'overflow-indicator');
+
+          // Pulsing arrow
+          var arrowY = paddingTop + 5;
+          arrowG.append('polygon')
+            .attr('points', function() {
+              var mx = bar2X + barW / 2;
+              return (mx - 10) + ',' + (arrowY + 15) + ' ' + mx + ',' + arrowY + ' ' + (mx + 10) + ',' + (arrowY + 15);
+            })
+            .attr('fill', getColor('--color-critical'));
+
+          // Overflow value text
+          arrowG.append('text')
+            .attr('x', bar2X + barW / 2)
+            .attr('y', arrowY + 30)
+            .attr('text-anchor', 'middle')
+            .attr('fill', getColor('--color-critical'))
+            .attr('font-size', Math.max(10, w * 0.02))
+            .attr('font-weight', 700)
+            .text(expVal > 1e9 ? expVal.toExponential(1) : expVal.toLocaleString());
+
+          // "溢出！" label
+          arrowG.append('text')
+            .attr('x', bar2X + barW / 2)
+            .attr('y', arrowY + 46)
+            .attr('text-anchor', 'middle')
+            .attr('fill', getColor('--color-critical'))
+            .attr('font-size', Math.max(9, w * 0.018))
+            .text('\u2191 \u6EA2\u51FA\uFF01');
+        }
+
+        // Title
+        svg.selectAll('.chart-title').remove();
+        svg.append('text')
+          .attr('class', 'chart-title')
+          .attr('x', w / 2)
+          .attr('y', 18)
+          .attr('text-anchor', 'middle')
+          .attr('fill', getColor('--text-primary'))
+          .attr('font-size', Math.max(13, w * 0.028))
+          .attr('font-weight', 700)
+          .text('n = ' + n + ' \u6642\u7684\u8A08\u7B97\u91CF\u6BD4\u8F03');
+      }
+
+      // Initial draw
+      updateChart(5);
+
+      // Slider event
+      slider.on('input', function() {
+        var n = parseInt(this.value, 10);
+        updateChart(n);
+      });
+    }
+
+    // ---- Clear timers ----
+    function clearTimers() {
+      animationTimers.forEach(function(t) { clearTimeout(t); });
+      animationTimers = [];
+    }
+
+    // ---- Chart lifecycle ----
+    function initChart() {
+      drawV7();
+    }
+
+    function destroyChart() {
+      clearTimers();
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      container.append('div')
+        .attr('class', 'chart-skeleton')
+        .text('\u5716\u8868\u8F09\u5165\u4E2D\u2026');
+      currentView = null;
+    }
+
+    registerChart(containerId, initChart, destroyChart);
+
+    // ---- Step updater ----
+    window.chartUpdaters['ch3'] = function(stepIndex) {
+      if (stepIndex <= 1 && currentView !== 'v7') {
+        clearTimers();
+        drawV7();
+      } else if (stepIndex >= 2 && currentView !== 'v8') {
+        clearTimers();
+        drawV8();
       }
     };
   })();
