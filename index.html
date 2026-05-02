@@ -753,6 +753,123 @@
         </div>
       </section>
 
+      <!-- ===== Chapter 2: 用數學描述問題 ===== -->
+      <section class="chapter" id="ch2">
+        <h2 class="chapter-title">Chapter 2：用數學描述問題</h2>
+        <div class="scrolly">
+          <div class="scrolly-text">
+            <!-- Step 0: 局面 = 快照 -->
+            <div class="step" data-step="0">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">局面 = 快照</h3>
+                <p>一個「局面」就是棋盤的一張快照——記錄三件事：(1) 每個交叉點上有黑子、白子、還是空的；(2) 輪到誰下；(3) 哪裡不能立刻下（劫禁點）。就這三樣東西，完整描述了一個圍棋局面。</p>
+              </div>
+            </div>
+
+            <!-- Step 1: 最好 = Minimax -->
+            <div class="step" data-step="1">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">最好 = Minimax</h3>
+                <p>在一個局面下，你選讓自己分數最大的一手，對手選讓你分數最小的一手。這就是 minimax——最大化自己的最小收益。</p>
+                <div class="accordion">
+                  <button class="accordion-btn" aria-expanded="false" aria-controls="ch2-math-panel-1">
+                    <span>查看數學細節</span>
+                    <span aria-hidden="true">&#9662;</span>
+                  </button>
+                  <div class="accordion-panel" id="ch2-math-panel-1" role="region">
+                    <div class="math-content">
+                      <p>$$V(S) = \max_{m}\bigl[-V(\mathrm{apply}(S,m))\bigr]$$</p>
+                      <p>$V(S)$ 是局面 $S$ 對「輪到下的人」的價值。你下了一手 $m$ 之後，換對手面對新局面 $\mathrm{apply}(S,m)$，對手的價值是 $V(\mathrm{apply}(S,m))$——而對你來說是負的。所以你要在所有合法手 $m$ 中，選讓 $-V(\mathrm{apply}(S,m))$ 最大的那一手。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: 第二好 = 排序第二名 -->
+            <div class="step" data-step="2">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">第二好 = 排序第二名</h3>
+                <p>有了每一手棋的價值 Q(S,m)，最好的一手就是 Q 值最高的（m&#8321;），第二好就是排除 m&#8321; 後的最高（m&#8322;）。</p>
+                <div class="accordion">
+                  <button class="accordion-btn" aria-expanded="false" aria-controls="ch2-math-panel-2">
+                    <span>查看數學細節</span>
+                    <span aria-hidden="true">&#9662;</span>
+                  </button>
+                  <div class="accordion-panel" id="ch2-math-panel-2" role="region">
+                    <div class="math-content">
+                      <p>$$Q(S,m) = -V(\mathrm{apply}(S,m))$$</p>
+                      <p>$$m_1(S) = \arg\max_{m} Q(S,m)$$</p>
+                      <p>$$m_2(S) = \arg\max_{m \neq m_1} Q(S,m)$$</p>
+                      <p>$Q(S,m)$ 是在局面 $S$ 下走 $m$ 的「行動價值」。$m_1$ 是最佳手，$m_2$ 是次佳手。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: 公式 = 捷徑 -->
+            <div class="step" data-step="3">
+              <div class="step-content">
+                <h3 style="font-size:var(--text-lg);font-weight:700;margin-bottom:0.5rem">公式 = 捷徑</h3>
+                <p>「公式」= 不用暴力搜尋的捷徑，精確定義為 poly(n) 時間。圍棋的計分是整數，所以 Q 值一定是整數。</p>
+                <div class="accordion">
+                  <button class="accordion-btn" aria-expanded="false" aria-controls="ch2-math-panel-3">
+                    <span>查看數學細節</span>
+                    <span aria-hidden="true">&#9662;</span>
+                  </button>
+                  <div class="accordion-panel" id="ch2-math-panel-3" role="region">
+                    <div class="math-content">
+                      <table style="width:100%;border-collapse:collapse;font-size:var(--text-sm);">
+                        <thead>
+                          <tr style="border-bottom:2px solid var(--border-subtle);">
+                            <th style="text-align:left;padding:0.5rem;">層級</th>
+                            <th style="text-align:left;padding:0.5rem;">意思</th>
+                            <th style="text-align:left;padding:0.5rem;">時間</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr style="border-bottom:1px solid var(--border-subtle);">
+                            <td style="padding:0.5rem;">可計算</td>
+                            <td style="padding:0.5rem;">圖靈機最終能算完</td>
+                            <td style="padding:0.5rem;">無上界</td>
+                          </tr>
+                          <tr style="border-bottom:1px solid var(--border-subtle);">
+                            <td style="padding:0.5rem;">poly 時間</td>
+                            <td style="padding:0.5rem;">$n^k$ 步內完成</td>
+                            <td style="padding:0.5rem;">$O(n^k)$</td>
+                          </tr>
+                          <tr style="border-bottom:1px solid var(--border-subtle);">
+                            <td style="padding:0.5rem;">解析閉式</td>
+                            <td style="padding:0.5rem;">有限次 $+, -, \times, \div$ 等</td>
+                            <td style="padding:0.5rem;">$O(1)$</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:0.5rem;">電路</td>
+                            <td style="padding:0.5rem;">固定大小的邏輯閘</td>
+                            <td style="padding:0.5rem;">$O(1)$ 深度</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scrolly-chart">
+            <div class="chart-container"
+                 id="chart-v5"
+                 role="img"
+                 aria-label="Minimax 博弈樹動畫與 Q 值排序柱狀圖"
+                 aria-live="polite">
+              <div class="chart-skeleton">圖表載入中…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- ===== Chapter 4: 為什麼 Q 沒有公式 ===== -->
       <section class="chapter" id="ch4">
         <h2 class="chapter-title">Chapter 4：為什麼 Q 沒有公式</h2>
@@ -2075,6 +2192,436 @@
       } else if (stepIndex === 2 && currentView !== 'v4') {
         clearTimers();
         drawV4();
+      }
+    };
+  })();
+  </script>
+
+  <!-- ===== Chapter 2: V5 Minimax 博弈樹 + V6 Q值排序柱狀圖 ===== -->
+  <script>
+  (function() {
+    'use strict';
+
+    // Guard: if D3 failed to load, skip
+    if (typeof d3 === 'undefined') return;
+
+    var containerId = 'chart-v5';
+    var currentView = null; // 'v5' | 'v6'
+    var animationTimers = [];
+
+    // ---- Pre-defined tree data ----
+    var treeData = {
+      value: null, type: 'max', children: [
+        { value: null, type: 'min', children: [
+          { value: 3, type: 'max', children: [] },
+          { value: -1, type: 'max', children: [] },
+          { value: 5, type: 'max', children: [] }
+        ]},
+        { value: null, type: 'min', children: [
+          { value: 0, type: 'max', children: [] },
+          { value: 2, type: 'max', children: [] }
+        ]},
+        { value: null, type: 'min', children: [
+          { value: -3, type: 'max', children: [] },
+          { value: 1, type: 'max', children: [] },
+          { value: 4, type: 'max', children: [] }
+        ]}
+      ]
+    };
+
+    // Deep clone tree and assign computed minimax values
+    function cloneTree(node) {
+      var clone = { value: node.value, type: node.type, displayValue: null, children: [] };
+      if (node.children && node.children.length > 0) {
+        clone.children = node.children.map(cloneTree);
+      }
+      return clone;
+    }
+
+    function computeMinimax(node) {
+      if (!node.children || node.children.length === 0) {
+        node.displayValue = node.value;
+        return node.value;
+      }
+      var childValues = node.children.map(computeMinimax);
+      if (node.type === 'max') {
+        node.displayValue = Math.max.apply(null, childValues);
+      } else {
+        node.displayValue = Math.min.apply(null, childValues);
+      }
+      return node.displayValue;
+    }
+
+    // Flatten tree into array with positions for D3 layout
+    function layoutTree(root, w, h) {
+      // Assign depth and index
+      var levels = [];
+      function traverse(node, depth) {
+        if (!levels[depth]) levels[depth] = [];
+        node._depth = depth;
+        node._index = levels[depth].length;
+        levels[depth].push(node);
+        if (node.children) {
+          node.children.forEach(function(c) { traverse(c, depth + 1); });
+        }
+      }
+      traverse(root, 0);
+
+      var maxDepth = levels.length;
+      var paddingTop = 50;
+      var paddingBottom = 30;
+      var paddingX = 40;
+      var levelHeight = (h - paddingTop - paddingBottom) / Math.max(1, maxDepth - 1);
+
+      // Assign y positions by depth
+      // Assign x positions evenly within each level
+      var nodes = [];
+      var edges = [];
+
+      // First pass: assign x,y based on level and index
+      levels.forEach(function(level, d) {
+        var count = level.length;
+        var availW = w - 2 * paddingX;
+        level.forEach(function(node, i) {
+          node._y = paddingTop + d * levelHeight;
+          node._x = paddingX + (count === 1 ? availW / 2 : (i / (count - 1)) * availW);
+          nodes.push(node);
+        });
+      });
+
+      // Reposition to center children under parent
+      // Bottom-up: parent x = average of children x
+      for (var d = maxDepth - 2; d >= 0; d--) {
+        levels[d].forEach(function(node) {
+          if (node.children && node.children.length > 0) {
+            var sum = 0;
+            node.children.forEach(function(c) { sum += c._x; });
+            node._x = sum / node.children.length;
+          }
+        });
+      }
+
+      // Build edges
+      nodes.forEach(function(node) {
+        if (node.children) {
+          node.children.forEach(function(child) {
+            edges.push({ parent: node, child: child });
+          });
+        }
+      });
+
+      return { nodes: nodes, edges: edges, levels: levels };
+    }
+
+    // ---- V5: Minimax 博弈樹 ----
+    function drawV5() {
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      currentView = 'v5';
+
+      var el = container.node();
+      var w = el.clientWidth || 500;
+      var h = Math.max(400, w * 0.75);
+
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + w + ' ' + h)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svg.append('desc').text('Minimax 博弈樹：值從葉節點傳播到根節點，Max 層取最大值，Min 層取最小值。');
+
+      var tree = cloneTree(treeData);
+      computeMinimax(tree);
+
+      var layout = layoutTree(tree, w, h);
+      var nodes = layout.nodes;
+      var edges = layout.edges;
+      var levels = layout.levels;
+
+      var nodeW = Math.max(40, Math.min(60, w * 0.1));
+      var nodeH = Math.max(28, Math.min(40, w * 0.07));
+      var fontSize = Math.max(12, Math.min(16, w * 0.028));
+      var labelFontSize = Math.max(10, Math.min(13, w * 0.022));
+
+      var maxColor = getColor('--color-info');
+      var minColor = getColor('--color-critical');
+
+      // Draw edges
+      edges.forEach(function(e) {
+        svg.append('line')
+          .attr('x1', e.parent._x)
+          .attr('y1', e.parent._y + nodeH / 2)
+          .attr('x2', e.child._x)
+          .attr('y2', e.child._y - nodeH / 2)
+          .attr('stroke', getColor('--border-subtle'))
+          .attr('stroke-width', 2);
+      });
+
+      // Draw nodes with "?" initially
+      var nodeGroups = [];
+      nodes.forEach(function(node) {
+        var g = svg.append('g')
+          .attr('transform', 'translate(' + node._x + ',' + node._y + ')');
+
+        g.append('rect')
+          .attr('x', -nodeW / 2)
+          .attr('y', -nodeH / 2)
+          .attr('width', nodeW)
+          .attr('height', nodeH)
+          .attr('rx', 6)
+          .attr('ry', 6)
+          .attr('fill', node.type === 'max' ? maxColor : minColor)
+          .attr('opacity', 0.85);
+
+        var label = g.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('dominant-baseline', 'central')
+          .attr('fill', '#fff')
+          .attr('font-size', fontSize)
+          .attr('font-weight', 700)
+          .text('?');
+
+        // Type label (Max/Min) above node
+        g.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('y', -nodeH / 2 - 6)
+          .attr('fill', node.type === 'max' ? maxColor : minColor)
+          .attr('font-size', labelFontSize)
+          .attr('font-weight', 600)
+          .text(node.type === 'max' ? 'Max' : 'Min');
+
+        nodeGroups.push({ node: node, label: label, g: g });
+      });
+
+      // Auto-play animation: propagate values from leaves to root
+      var maxDepth = levels.length - 1;
+      var delay = 500;
+
+      for (var d = maxDepth; d >= 0; d--) {
+        (function(depth) {
+          var tid = setTimeout(function() {
+            if (currentView !== 'v5') return;
+            nodeGroups.forEach(function(ng) {
+              if (ng.node._depth === depth) {
+                ng.label
+                  .transition()
+                  .duration(300)
+                  .attr('font-size', fontSize * 1.3)
+                  .transition()
+                  .duration(200)
+                  .attr('font-size', fontSize)
+                  .on('start', function() {
+                    d3.select(this).text(ng.node.displayValue);
+                  });
+              }
+            });
+          }, (maxDepth - depth) * delay);
+          animationTimers.push(tid);
+        })(d);
+      }
+    }
+
+    // ---- V6: Q值排序柱狀圖 ----
+    function drawV6() {
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      currentView = 'v6';
+
+      var el = container.node();
+      var w = el.clientWidth || 500;
+      var h = Math.max(350, w * 0.65);
+
+      var svg = container.append('svg')
+        .attr('viewBox', '0 0 ' + w + ' ' + h)
+        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+      svg.append('desc').text('Q 值柱狀圖：7 個候選手的 Q 值，最高標為 m1，第二高標為 m2。');
+
+      var moves = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+      var qValues = [3, -1, 5, 0, 2, -3, 1];
+      var n = moves.length;
+
+      var paddingLeft = 50;
+      var paddingRight = 20;
+      var paddingTop = 30;
+      var paddingBottom = 50;
+      var chartW = w - paddingLeft - paddingRight;
+      var chartH = h - paddingTop - paddingBottom;
+
+      var maxQ = Math.max.apply(null, qValues);
+      var minQ = Math.min.apply(null, qValues);
+      var absMax = Math.max(Math.abs(maxQ), Math.abs(minQ));
+      // Scale: map [-absMax, absMax] to [chartH, 0]
+      var baseline = paddingTop + chartH * (absMax / (2 * absMax));
+      var barW = Math.min(50, chartW / n * 0.7);
+      var gap = (chartW - barW * n) / (n + 1);
+
+      // Find m1 and m2 indices
+      var sorted = qValues.map(function(v, i) { return { v: v, i: i }; });
+      sorted.sort(function(a, b) { return b.v - a.v; });
+      var m1Index = sorted[0].i;
+      var m2Index = sorted[1].i;
+
+      // Axis
+      // Y axis
+      svg.append('line')
+        .attr('x1', paddingLeft)
+        .attr('y1', paddingTop)
+        .attr('x2', paddingLeft)
+        .attr('y2', paddingTop + chartH)
+        .attr('stroke', getColor('--text-secondary'))
+        .attr('stroke-width', 1);
+
+      // Zero line
+      svg.append('line')
+        .attr('x1', paddingLeft)
+        .attr('y1', baseline)
+        .attr('x2', w - paddingRight)
+        .attr('y2', baseline)
+        .attr('stroke', getColor('--text-secondary'))
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '4,3');
+
+      // Zero label
+      svg.append('text')
+        .attr('x', paddingLeft - 8)
+        .attr('y', baseline)
+        .attr('text-anchor', 'end')
+        .attr('dominant-baseline', 'central')
+        .attr('fill', getColor('--text-secondary'))
+        .attr('font-size', Math.max(11, w * 0.022))
+        .text('0');
+
+      var defaultColor = getColor('--bg-overlay');
+      var highlightM1 = getColor('--color-high');
+      var highlightM2 = getColor('--color-indigo');
+
+      // Draw bars
+      var barGroups = [];
+      qValues.forEach(function(q, i) {
+        var x = paddingLeft + gap + i * (barW + gap);
+        var barH = Math.abs(q) / absMax * (chartH / 2);
+        var y = q >= 0 ? baseline - barH : baseline;
+
+        var bar = svg.append('rect')
+          .attr('x', x)
+          .attr('y', baseline) // start at baseline
+          .attr('width', barW)
+          .attr('height', 0) // start at 0
+          .attr('rx', 3)
+          .attr('fill', defaultColor)
+          .attr('stroke', getColor('--border-subtle'))
+          .attr('stroke-width', 1);
+
+        // Move label
+        svg.append('text')
+          .attr('x', x + barW / 2)
+          .attr('y', paddingTop + chartH + 20)
+          .attr('text-anchor', 'middle')
+          .attr('fill', getColor('--text-primary'))
+          .attr('font-size', Math.max(12, w * 0.026))
+          .attr('font-weight', 600)
+          .text(moves[i]);
+
+        barGroups.push({ bar: bar, q: q, x: x, y: y, barH: barH, i: i });
+      });
+
+      // Animation: grow bars
+      barGroups.forEach(function(bg, idx) {
+        var tid = setTimeout(function() {
+          if (currentView !== 'v6') return;
+          bg.bar
+            .transition()
+            .duration(400)
+            .attr('y', bg.y)
+            .attr('height', bg.barH);
+        }, idx * 100);
+        animationTimers.push(tid);
+      });
+
+      // After bars grow, highlight m1
+      var m1Tid = setTimeout(function() {
+        if (currentView !== 'v6') return;
+        barGroups[m1Index].bar
+          .transition()
+          .duration(400)
+          .attr('fill', highlightM1)
+          .attr('stroke', highlightM1);
+
+        // Add m1 label
+        var bg = barGroups[m1Index];
+        svg.append('text')
+          .attr('x', bg.x + barW / 2)
+          .attr('y', bg.y - 8)
+          .attr('text-anchor', 'middle')
+          .attr('fill', highlightM1)
+          .attr('font-size', Math.max(12, w * 0.024))
+          .attr('font-weight', 700)
+          .attr('opacity', 0)
+          .text('m\u2081 = ' + bg.q)
+          .transition()
+          .duration(300)
+          .attr('opacity', 1);
+      }, n * 100 + 500);
+      animationTimers.push(m1Tid);
+
+      // Then highlight m2
+      var m2Tid = setTimeout(function() {
+        if (currentView !== 'v6') return;
+        barGroups[m2Index].bar
+          .transition()
+          .duration(400)
+          .attr('fill', highlightM2)
+          .attr('stroke', highlightM2);
+
+        // Add m2 label
+        var bg = barGroups[m2Index];
+        svg.append('text')
+          .attr('x', bg.x + barW / 2)
+          .attr('y', bg.y - 8)
+          .attr('text-anchor', 'middle')
+          .attr('fill', highlightM2)
+          .attr('font-size', Math.max(12, w * 0.024))
+          .attr('font-weight', 700)
+          .attr('opacity', 0)
+          .text('m\u2082 = ' + bg.q)
+          .transition()
+          .duration(300)
+          .attr('opacity', 1);
+      }, n * 100 + 1200);
+      animationTimers.push(m2Tid);
+    }
+
+    // ---- Clear timers ----
+    function clearTimers() {
+      animationTimers.forEach(function(t) { clearTimeout(t); });
+      animationTimers = [];
+    }
+
+    // ---- Chart lifecycle ----
+    function initChart() {
+      drawV5();
+    }
+
+    function destroyChart() {
+      clearTimers();
+      var container = d3.select('#' + containerId);
+      container.selectAll('*').remove();
+      container.append('div')
+        .attr('class', 'chart-skeleton')
+        .text('\u5716\u8868\u8F09\u5165\u4E2D\u2026');
+      currentView = null;
+    }
+
+    registerChart(containerId, initChart, destroyChart);
+
+    // ---- Step updater ----
+    window.chartUpdaters['ch2'] = function(stepIndex) {
+      if (stepIndex <= 1 && currentView !== 'v5') {
+        clearTimers();
+        drawV5();
+      } else if (stepIndex >= 2 && currentView !== 'v6') {
+        clearTimers();
+        drawV6();
       }
     };
   })();
