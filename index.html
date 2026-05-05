@@ -70,6 +70,8 @@
       --text-base: 24px;
       --text-sm: 20px;
       --text-xs: 18px;
+      --board-stone-text: 36px;
+      --board-marker-text: 12px;
     }
 
     @supports not (color: oklch(0 0 0)) {
@@ -413,7 +415,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 36px;
+      font-size: var(--board-stone-text);
       background: var(--bg-surface);
       border: 2px solid var(--border-subtle);
       border-radius: 0.5rem;
@@ -446,7 +448,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: var(--board-marker-text);
       font-weight: 700;
       color: var(--text-on-color);
       line-height: 1;
@@ -753,6 +755,56 @@
         "name": "Paper B：A Space-Compression Argument for the Best-Move Function in EXPTIME-Complete Games",
         "contentUrl": "https://go-second-best-move-formula.proof.weiqi.kids/paper-b/paper.pdf",
         "encodingFormat": "application/pdf"
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage（餵 AI search） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "那 AlphaGo / KataGo 不是做到了嗎？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "近似不等於精確。KataGo 提供的是啟發式估計（勝率、目差近似），會犯錯，且無精確度保證。本文的「公式」要求對所有局面精確輸出 m₂，不允許任何錯誤。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "那量子電腦呢？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "量子電腦能力（BQP）仍在 PSPACE 以內，遠不及 EXPTIME。量子加速不足以攻破圍棋的計算複雜度壁壘。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "那圍棋收官公式（CGT / 溫度圖）不是存在嗎？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "CGT 收官公式適用於可分解的局部終盤（獨立區域之間無交互作用），與本文的全局不存在性結論不矛盾。本文證明的是：對所有合法局面（包括中盤、劫爭糾纏等不可分解的情況）不存在通用公式。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "為什麼證明只有 5×5 卻能推到 19×19？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "完整證明走計算複雜度（PSPACE-hard）與資訊論（Kolmogorov complexity）兩條獨立路徑，兩者皆對任意 N×N 棋盤成立（PSPACE-hard 已對所有 N ≥ 5 證明，且 19 ≥ 5）。5×5 圖示只是視覺輔助，正式論證涵蓋 19×19。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "這對 AlphaGo Zero 等強化學習設計有什麼啟示？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "本結果說明：精確的「次優手」公式不存在，但啟發式近似（神經網路 + MCTS）可以接近——這正是 AlphaGo / KataGo 的設計核心。理論上限提示：任何號稱「公式級精確」的工具必定錯，但「足夠近似」是可達的。"
+        }
       }
     ]
   }
@@ -1336,7 +1388,7 @@
         </div>
       </section>
 
-    <section class="faq" style="max-width:72rem;margin:2rem auto;padding:0 1rem">
+    <section class="faq" id="faq" style="max-width:72rem;margin:2rem auto;padding:0 1rem">
       <h2 style="font-size:var(--text-xl);font-weight:700;margin-bottom:1rem">常見問題</h2>
       <div class="accordion">
         <button class="accordion-btn" aria-expanded="false" aria-controls="faq-panel-0">
