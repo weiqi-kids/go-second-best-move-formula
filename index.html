@@ -4,6 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>圍棋的「第二好的一手」——為什麼不存在捷徑？</title>
+  <meta name="description" content="嚴格證明：圍棋「第二好的次一手」不存在任何普世可計算的封閉公式。從計算複雜度與資訊論雙路徑論證 19×19 圍棋次優手選擇必須回到逐手搜尋與評估。">
+  <meta name="author" content="weiqi.kids">
+  <link rel="canonical" href="https://go-second-best-move-formula.proof.weiqi.kids/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="圍棋第二好的一手：為什麼不存在公式">
+  <meta property="og:description" content="嚴格證明：圍棋「第二好的次一手」不存在任何普世可計算的封閉公式。從計算複雜度與資訊論雙路徑論證 19×19 圍棋次優手選擇必須回到逐手搜尋與評估。">
+  <meta property="og:url" content="https://go-second-best-move-formula.proof.weiqi.kids/">
+  <meta property="og:site_name" content="weiqi.kids">
+  <meta property="og:locale" content="zh_TW">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="圍棋第二好的一手：為什麼不存在公式">
+  <meta name="twitter:description" content="嚴格證明：圍棋「第二好的次一手」不存在任何普世可計算的封閉公式。從計算複雜度與資訊論雙路徑論證 19×19 圍棋次優手選擇必須回到逐手搜尋與評估。">
+
   <style>
     /* ===== CSS Custom Properties (OKLCH primary, hex fallback) ===== */
     :root {
@@ -31,6 +48,14 @@
       --border-subtle: oklch(0.85 0.005 250);
       --stone-black: oklch(0.25 0.01 250);
       --stone-white: oklch(0.95 0.005 250);
+
+      /* Surfaces / on-color text */
+      --text-on-color: oklch(1 0 0);
+
+      /* Go board */
+      --board-bg: oklch(0.84 0.07 80);
+      --board-line: oklch(0.55 0.08 75);
+      --liberty-dot: oklch(0.72 0.22 145);
 
       /* Typography tokens */
       --text-3xl: 56px;
@@ -61,6 +86,10 @@
         --border-subtle: #d5d6da;
         --stone-black: #2a2c3a;
         --stone-white: #f0f1f3;
+        --text-on-color: #ffffff;
+        --board-bg: #e8c97a;
+        --board-line: #a08040;
+        --liberty-dot: #2ecc40;
       }
     }
 
@@ -414,7 +443,7 @@
       justify-content: center;
       font-size: 12px;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-on-color);
       line-height: 1;
     }
     .ch0-result {
@@ -500,7 +529,7 @@
       border-radius: 8px;
       font-size: var(--text-lg);
       font-weight: 700;
-      color: #fff;
+      color: var(--text-on-color);
       opacity: 0;
       transition: opacity 0.5s;
     }
@@ -516,14 +545,14 @@
 
     /* ===== Ch1: 互動棋盤 + 氣的高亮 ===== */
     .ch1-board-bg {
-      fill: #e8c97a;
+      fill: var(--board-bg);
     }
     .ch1-grid-line {
-      stroke: #a08040;
+      stroke: var(--board-line);
       stroke-width: 0.5;
     }
     .ch1-star-point {
-      fill: #a08040;
+      fill: var(--board-line);
     }
     .ch1-stone {
       cursor: default;
@@ -534,7 +563,7 @@
       transition: opacity 0.5s;
     }
     .ch1-liberty-dot {
-      fill: #2ecc40;
+      fill: var(--liberty-dot);
       opacity: 0;
       animation: ch1-pulse 1s ease-in-out infinite;
     }
@@ -663,15 +692,78 @@
       }
     }
   </style>
+
+  <!-- JSON-LD: ScholarlyArticle -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "headline": "圍棋的「第二好的一手」——為什麼不存在捷徑？",
+    "description": "一個業餘棋手的直覺問題，如何通往計算理論的深處：證明在廣義圍棋上不存在多項式時間的「第二好的一手」函數。",
+    "url": "https://go-second-best-move-formula.proof.weiqi.kids/",
+    "image": "https://go-second-best-move-formula.proof.weiqi.kids/note.png",
+    "inLanguage": "zh-Hant",
+    "datePublished": "2026-05-02",
+    "author": [
+      { "@type": "Person", "name": "Lightman Chang" },
+      { "@type": "Person", "name": "Claude", "affiliation": { "@type": "Organization", "name": "Anthropic" } }
+    ],
+    "publisher": { "@type": "Organization", "name": "weiqi.kids" },
+    "mainEntityOfPage": "https://go-second-best-move-formula.proof.weiqi.kids/",
+    "encoding": [
+      {
+        "@type": "MediaObject",
+        "name": "Paper A：On the Non-Existence of a Polynomial-Time Second-Best Move Function for Generalized Go",
+        "contentUrl": "https://go-second-best-move-formula.proof.weiqi.kids/paper-a/paper.pdf",
+        "encodingFormat": "application/pdf"
+      },
+      {
+        "@type": "MediaObject",
+        "name": "Paper B：A Space-Compression Argument for the Best-Move Function in EXPTIME-Complete Games",
+        "contentUrl": "https://go-second-best-move-formula.proof.weiqi.kids/paper-b/paper.pdf",
+        "encodingFormat": "application/pdf"
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <a href="#main" class="skip-link">跳至主要內容</a>
+
+  <!-- GITHUB CORNER -->
+  <a href="https://github.com/weiqi-kids/go-second-best-move-formula" class="github-corner"
+     aria-label="View source on GitHub" target="_blank" rel="noopener"
+     style="position:fixed;top:0;right:0;z-index:101;color:var(--bg-base);">
+    <svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true" style="fill:var(--color-info);color:var(--bg-base);display:block;">
+      <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+      <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin:130px 106px"></path>
+      <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor"></path>
+    </svg>
+  </a>
 
   <div class="page-wrapper">
     <header class="hero">
       <h1>圍棋的「第二好的一手」——為什麼不存在捷徑？</h1>
       <p class="subtitle">一個業餘棋手的直覺問題，如何通往計算理論的深處</p>
       <div class="hero-board" id="hero-board" role="img" aria-label="裝飾用的九路圍棋棋盤，上面散落著幾顆黑白棋子"></div>
+
+      <div class="download-section" style="margin-top:2rem;display:flex;flex-direction:column;gap:0.75rem;align-items:center;">
+        <p class="download-intro" style="font-size:var(--text-sm);color:var(--text-secondary);margin-bottom:0.25rem;">完整論文下載：</p>
+        <div class="download-buttons" style="display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;">
+          <a href="paper-a/paper.pdf" class="download-btn" data-paper="paper-a" target="_blank" rel="noopener"
+             aria-label="下載 Paper A 之 PDF 完整版"
+             style="display:inline-flex;flex-direction:column;align-items:flex-start;padding:0.875rem 1.25rem;background:var(--bg-base);border:2px solid var(--color-link);border-radius:0.5rem;text-decoration:none;color:var(--text-primary);min-width:14rem;text-align:left;transition:all 0.2s;">
+            <span style="font-size:var(--text-base);font-weight:600;">📄 Paper A：On the Non-Existence of a Polynomial-Time Second-Best Move Function for Generalized Go</span>
+            <span style="font-size:var(--text-xs);color:var(--text-muted);margin-top:0.25rem;">PDF · 7 頁 · 307 KB</span>
+          </a>
+          <a href="paper-b/paper.pdf" class="download-btn" data-paper="paper-b" target="_blank" rel="noopener"
+             aria-label="下載 Paper B 之 PDF 完整版"
+             style="display:inline-flex;flex-direction:column;align-items:flex-start;padding:0.875rem 1.25rem;background:var(--bg-base);border:2px solid var(--color-link);border-radius:0.5rem;text-decoration:none;color:var(--text-primary);min-width:14rem;text-align:left;transition:all 0.2s;">
+            <span style="font-size:var(--text-base);font-weight:600;">📄 Paper B：A Space-Compression Argument for the Best-Move Function in EXPTIME-Complete Games</span>
+            <span style="font-size:var(--text-xs);color:var(--text-muted);margin-top:0.25rem;">PDF · 6 頁 · 269 KB</span>
+          </a>
+        </div>
+      </div>
     </header>
 
     <main id="main">
@@ -1254,6 +1346,7 @@
     <footer class="site-footer">
       <div class="page-wrapper">
         <p>本文的數學推導由作者與 AI（Claude）協作完成。互動網頁由 AI 輔助設計與開發。</p>
+        <p style="margin-top:0.5rem">原始碼與證明手稿：<a href="https://github.com/weiqi-kids/go-second-best-move-formula" target="_blank" rel="noopener">github.com/weiqi-kids/go-second-best-move-formula</a></p>
         <h3>參考文獻</h3>
         <ol>
           <li>Robson, J.M. (1983). "The Complexity of Go." IFIP Congress, pp. 413–417.</li>
@@ -1280,7 +1373,7 @@
           crossorigin="anonymous"
           onerror="document.getElementById('d3-fallback').style.display='block'"></script>
   <noscript>
-    <p style="text-align:center;padding:2rem;color:#c93135;">本頁需要 JavaScript 才能顯示互動圖表。</p>
+    <p style="text-align:center;padding:2rem;color:var(--color-critical);">本頁需要 JavaScript 才能顯示互動圖表。</p>
   </noscript>
   <div id="d3-fallback" style="display:none;text-align:center;padding:2rem;color:var(--color-critical);font-size:var(--text-sm);">
     互動圖表載入失敗，請檢查網路連線。

@@ -1,0 +1,10 @@
+.DS_Store
+.claude/
+.proof-page/
+node_modules/
+paper-*/*.aux
+paper-*/*.log
+paper-*/*.out
+paper-*/*.fls
+paper-*/*.fdb_latexmk
+paper-*/*.synctex.gz
