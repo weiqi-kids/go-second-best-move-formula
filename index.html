@@ -696,7 +696,33 @@
         padding: 2rem 1rem;
       }
     }
-  </style>
+  
+/* ===== AEO Share-to-AI Button ===== */
+.share-ai-btn {
+  display: inline-flex; align-items: center; gap: 0.25rem;
+  font-size: var(--text-xs); color: var(--text-muted);
+  background: none; border: 1px solid var(--border-subtle);
+  border-radius: 0.25rem; padding: 0.15rem 0.6rem;
+  cursor: pointer; margin-left: 0.75rem; vertical-align: middle;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  font-family: inherit;
+}
+.share-ai-btn:hover {
+  color: var(--color-link); border-color: var(--color-link);
+  background: var(--bg-surface);
+}
+.share-ai-btn:focus-visible {
+  outline: 2px solid var(--color-link); outline-offset: 2px;
+}
+.share-ai-btn.copied {
+  color: var(--color-pass, var(--color-link));
+  border-color: var(--color-pass, var(--color-link));
+}
+@media (max-width: 640px) {
+  .share-ai-btn { font-size: 0.75rem; margin-left: 0.5rem; padding: 0.1rem 0.45rem; }
+}
+
+</style>
 
   <!-- JSON-LD: ScholarlyArticle -->
   <script type="application/ld+json">
@@ -6094,5 +6120,83 @@
     };
   })();
   </script>
+
+<!-- AEO Share-to-AI buttons (auto-injected per section h2) -->
+<script>
+(function () {
+  // 偵測候選 section（含 id 的 .theorem-section / .chapter / .section / 其他主內容 section）
+  const SELECTORS = [
+    '.theorem-section[id]',
+    '.chapter[id]',
+    'section.section[id]',
+    'article[id]',
+    'main section[id]',
+  ];
+  const sections = new Set();
+  for (const sel of SELECTORS) {
+    document.querySelectorAll(sel).forEach((s) => {
+      if (s.id && s.id !== 'hero' && s.id !== 'progress-bar' && !s.classList.contains('hero')) {
+        sections.add(s);
+      }
+    });
+  }
+
+  sections.forEach((section) => {
+    const h2 = section.querySelector(':scope > h2, :scope > header > h2, :scope > h2:first-of-type, h2');
+    if (!h2 || !section.contains(h2)) return;
+    if (h2.querySelector('.share-ai-btn')) return; // 冪等
+    if (!h2.dataset.heading) h2.dataset.heading = h2.textContent.trim();
+
+    const clone = section.cloneNode(true);
+    clone.querySelectorAll('.chart-container, .share-ai-btn, script, style, svg, canvas, .ai-share-btn')
+      .forEach((el) => el.remove());
+    const fullText = clone.textContent.replace(/\s+/g, ' ').trim().slice(0, 1500);
+
+    const btn = document.createElement('button');
+    btn.className = 'share-ai-btn';
+    btn.type = 'button';
+    btn.textContent = '💬 複製到 AI';
+    btn.title = '複製此段完整內容與連結，可貼到 ChatGPT 或 Claude 接續討論';
+    btn.setAttribute('aria-label', '複製此段摘要與連結到剪貼簿');
+
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const url = location.origin + location.pathname + '#' + section.id;
+      const heading = h2.dataset.heading;
+      const payload =
+        '我正在閱讀以下這段：\n\n' +
+        '## ' + heading + '\n\n' +
+        fullText + '\n\n' +
+        '---\n' +
+        '完整內容：' + url + '\n\n' +
+        '請扮演這篇論文的共同作者，依高中生能懂的語言（最多一個符號且立刻白話化）和我討論這段，必要時可延伸到相關概念。';
+      const done = () => {
+        btn.textContent = '✓ 已複製';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '💬 複製到 AI';
+          btn.classList.remove('copied');
+        }, 1800);
+      };
+      try {
+        await navigator.clipboard.writeText(payload);
+        done();
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = payload;
+        ta.style.cssText = 'position:fixed;left:-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        done();
+      }
+    });
+
+    h2.appendChild(btn);
+  });
+})();
+</script>
+
 </body>
 </html>
