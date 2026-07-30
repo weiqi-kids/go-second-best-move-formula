@@ -723,3 +723,7 @@ Berlekamp & Wolfe (1994) 的溫度圖理論為圍棋**可分解收官**提供了
 9. Baker, T., Gill, J. & Solovay, R. (1975). "Relativizations of the P =? NP Question." *SIAM J. Comput.*, 4(4), pp. 431–442.
 10. Buhrman, H., Fortnow, L. & Thierauf, T. (1998). "Nonrelativizing Separations." *CCC 1998*, pp. 8–12.
 11. Floyd, R.W. (1967). "Nondeterministic Algorithms." *JACM*, 14(4), pp. 636–644. (Cycle detection algorithm.)
+
+---
+
+Maintained by Light. I build and maintain websites with AI as a service: [arthurs.tw](https://arthurs.tw/?utm_source=github&utm_medium=readme&utm_campaign=oss)
